@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:bns_skill_assistant/services/key_event.dart';
 import 'package:bns_skill_assistant/services/key_hook_manager.dart';
+import 'package:bns_skill_assistant/tools/screen_color_picker.dart';
 import 'package:win32/win32.dart';
 
 class ActionContext {
@@ -34,7 +35,7 @@ class WaitForClickAction implements Action {
       return false;
     }
 
-    return await KeyHookManager.waitKey(KeyEvent(keyCode: event.keyCode, type: EventType.keyUp), timeout: 500);
+    return await KeyHookManager.waitKey(KeyEvent(keyCode: event.keyCode, type: EventType.keyUp), timeout: 300);
   }
 }
 
@@ -50,7 +51,7 @@ class WaitForDoubleClickAction implements Action {
       return false;
     }
 
-    ret = await WaitForClickAction(event, timeout: 500).execute(context);
+    ret = await WaitForClickAction(event, timeout: 300).execute(context);
     return ret;
   }
 }
@@ -81,19 +82,76 @@ class WaitAction implements Action {
   }
 }
 
+class ScreenColorPickerAction implements Action {
+  ScreenColorPickerAction();
+
+  @override
+  Future<bool> execute(ActionContext context) async {
+    final color = await ScreenColorPicker.pickColorAsync();
+    log('鼠标位置: (${color?.x}, ${color?.y})');
+    log('颜色: ${color?.color} #${color?.color.toRadixString(16).padLeft(6, '0').toUpperCase()}');
+    return color != null;
+  }
+}
+
+class WaitComposeKeyAction implements Action {
+  final List<int> events;
+  WaitComposeKeyAction(this.events);
+
+  @override
+  Future<bool> execute(ActionContext context) async {
+    for (final event in events) {
+      final ret = await KeyHookManager.nextKey(timeout: 1000);
+      if (ret?.keyCode != event) {
+        return false;
+      }
+    }
+    return true;
+  }
+}
+
+class ColorTestAction implements Action {
+  final Pixel pixel;
+  ColorTestAction(this.pixel);
+
+  @override
+  Future<bool> execute(ActionContext context) async {
+    final hdcScreen = GetDC(NULL);
+    final pix = GetPixel(hdcScreen, pixel.x, pixel.y);
+    // log('ColorTestAction 颜色: $pix ${pixel.color}');
+    return pix == pixel.color;
+  }
+}
+
 abstract class SkillCombo {
   List<Action> getActions();
 
   Future<void> start() async {
     active = true;
     while (active) {
+      await Future.delayed(const Duration(milliseconds: 1));
+
+      final runningProgram = KeyHookManager.getForegroundWindowInfo();
+      if (!runningProgram.contains('bns')) {
+        continue;
+      }
+
+      final actions = getActions();
+      if (actions.isEmpty) {
+        return;
+      }
       for (final action in getActions()) {
         if (!active) {
           break;
         }
         final context = ActionContext();
-        final result = await action.execute(context);
-        if (!result) {
+        try {
+          final result = await action.execute(context);
+          if (!result) {
+            break;
+          }
+        } catch (e) {
+          log('Action error: $e');
           break;
         }
       }
@@ -111,11 +169,75 @@ class TestSkillCombo extends SkillCombo {
   @override
   List<Action> getActions() {
     return [
-      WaitForDoubleClickAction(KeyEvent(keyCode: mouseXButton),),
       WaitAction(100),
-      PressKeyAction(KeyEvent(keyCode: VIRTUAL_KEY.VK_W)),
+    ];
+  }
+}
+
+class PickColor extends SkillCombo {
+  @override
+  List<Action> getActions() {
+    return [
+      WaitComposeKeyAction([VIRTUAL_KEY.VK_LCONTROL, VIRTUAL_KEY.VK_P]),
       WaitAction(100),
-      PressKeyAction(KeyEvent(keyCode: VIRTUAL_KEY.VK_W)),
+      ScreenColorPickerAction(),
+    ];
+  }
+}
+
+class JianShiCombo extends SkillCombo {
+  @override
+  List<Action> getActions() {
+    return [
+      WaitForKeyAction(KeyEvent(keyCode: mouseLButton)),
+      ColorTestAction(Pixel(1871, 1979, 15558)),
+      PressKeyAction(KeyEvent(keyCode: VIRTUAL_KEY.VK_4)),
+    ];
+  }
+}
+
+class QiGongComboSkillL extends SkillCombo {
+  @override
+  List<Action> getActions() {
+    return [
+      WaitForKeyAction(KeyEvent(keyCode: mouseRButton)),
+      WaitAction(500),
+      // 自动左键
+      PressKeyAction(KeyEvent(keyCode: mouseLButton)),
+    ];
+  }
+}
+
+class QiGongComboSkill2 extends SkillCombo {
+  @override
+  List<Action> getActions() {
+    return [
+      WaitForKeyAction(KeyEvent(keyCode: mouseRButton)),
+      WaitAction(500),
+      ColorTestAction(Pixel(1720, 1952, 1661608)),
+      PressKeyAction(KeyEvent(keyCode: VIRTUAL_KEY.VK_2)),
+    ];
+  }
+}
+
+class QiGongComboSkillFIce extends SkillCombo {
+  @override
+  List<Action> getActions() {
+    return [
+      WaitAction(50),
+      ColorTestAction(Pixel(2376, 1294, 7551515)),
+      PressKeyAction(KeyEvent(keyCode: VIRTUAL_KEY.VK_F)),
+    ];
+  }
+}
+
+class QiGongComboSkillFFire extends SkillCombo {
+  @override
+  List<Action> getActions() {
+    return [
+      WaitAction(50),
+      ColorTestAction(Pixel(2372, 1297, 8321279)),
+      PressKeyAction(KeyEvent(keyCode: VIRTUAL_KEY.VK_F)),
     ];
   }
 }

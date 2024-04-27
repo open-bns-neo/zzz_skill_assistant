@@ -23,7 +23,7 @@ int lowlevelKeyboardHookProc(int code, int wParam, int lParam) {
       event.type = EventType.keyUp;
     }
 
-    _sendPort?.send(event);
+    KeyHookManager.onKeyEvent(event);
   }
   return CallNextHookEx(KeyHookManager.keyHook, code, wParam, lParam);
 }
@@ -35,10 +35,10 @@ int lowlevelMouseHookProc(int code, int wParam, int lParam) {
     final kbs = Pointer<MSLLHOOKSTRUCT>.fromAddress(lParam);
     final event = KeyEvent();
     if (wParam == WM_LBUTTONDOWN) {
-      event.keyCode = mouseLeftButton;
+      event.keyCode = mouseLButton;
       event.type = EventType.keyDown;
     } else if (wParam == WM_LBUTTONUP) {
-      event.keyCode = mouseLeftButton;
+      event.keyCode = mouseLButton;
       event.type = EventType.keyUp;
     } else if (wParam == WM_XBUTTONDOWN) {
       event.keyCode = mouseXButton;
@@ -47,16 +47,16 @@ int lowlevelMouseHookProc(int code, int wParam, int lParam) {
       event.keyCode = mouseXButton;
       event.type = EventType.keyUp;
     } else if (wParam == WM_RBUTTONDOWN) {
-      event.keyCode = mouseRightButton;
+      event.keyCode = mouseRButton;
       event.type = EventType.keyDown;
     } else if (wParam == WM_RBUTTONUP) {
-      event.keyCode = mouseRightButton;
+      event.keyCode = mouseRButton;
       event.type = EventType.keyUp;
     } else {
       return CallNextHookEx(KeyHookManager.mouseHook, code, wParam, lParam);
     }
 
-    _sendPort?.send(event);
+    KeyHookManager.onKeyEvent(event);
   }
   return CallNextHookEx(KeyHookManager.mouseHook, code, wParam, lParam);
 }
@@ -72,35 +72,103 @@ final lpmousefn = NativeCallable<HOOKPROC>.isolateLocal(
 );
 
 void startIsolate() async {
-  // 创建 ReceivePort 以接收来自新 Isolate 的消息
   ReceivePort receivePort = ReceivePort();
-
-  // 创建并启动新的 Isolate
-  Isolate.spawn(isolateEntry, receivePort.sendPort);
-
-  // 监听从 Isolate 发送过来的消息
-  receivePort.listen((data) {
-    KeyHookManager.onKeyEvent(data as KeyEvent);
-  });
+  isolateEntry(receivePort.sendPort);
 }
 
-SendPort? _sendPort;
+int windowProc(int hWnd, int message, int wParam, int lParam) {
+  switch (message) {
+    case WM_DESTROY:
+      PostQuitMessage(0);
+      return 0;
+    default:
+      return DefWindowProc(hWnd, message, wParam, lParam);
+  }
+}
+
+int mainWindowProc(int hWnd, int uMsg, int wParam, int lParam) {
+  switch (uMsg) {
+    case WM_DESTROY:
+      PostQuitMessage(0);
+      return 0;
+
+    case WM_PAINT:
+      final ps = calloc<PAINTSTRUCT>();
+      final hdc = BeginPaint(hWnd, ps);
+      final rect = calloc<RECT>();
+      final msg = TEXT('Hello, Dart!');
+
+      GetClientRect(hWnd, rect);
+      DrawText(
+          hdc,
+          msg,
+          -1,
+          rect,
+          DRAW_TEXT_FORMAT.DT_CENTER |
+          DRAW_TEXT_FORMAT.DT_VCENTER |
+          DRAW_TEXT_FORMAT.DT_SINGLELINE);
+      EndPaint(hWnd, ps);
+
+      free(ps);
+      free(rect);
+      free(msg);
+
+      return 0;
+  }
+  return DefWindowProc(hWnd, uMsg, wParam, lParam);
+}
 
 // 运行在新 Isolate 中的函数
-void isolateEntry(SendPort sendPort) {
-  _sendPort = sendPort;
+void isolateEntry(SendPort sendPort) async {
+  // final hInstance = GetModuleHandle(nullptr);
+  // final wndClass = calloc<WNDCLASS>();
+  // wndClass.ref.lpfnWndProc = Pointer.fromFunction<WNDPROC>(windowProc, 0);
+  // wndClass.ref.hInstance = hInstance;
+  // wndClass.ref.lpszClassName = TEXT('test');
+  // RegisterClass(wndClass);
+  //
+  // final hWnd = CreateWindowEx(
+  //     0, // 扩展窗口样式
+  //     wndClass.ref.lpszClassName, // 窗口类名
+  //     TEXT('Sample Window'), // 窗口标题
+  //     WS_OVERLAPPEDWINDOW, // 窗口样式
+  //     CW_USEDEFAULT, // 窗口位置 X
+  //     CW_USEDEFAULT, // 窗口位置 Y
+  //     CW_USEDEFAULT, // 窗口宽度
+  //     CW_USEDEFAULT, // 窗口高度
+  //     NULL, // 父窗口句柄
+  //     NULL, // 菜单句柄
+  //     wndClass.ref.hInstance, // 应用程序实例句柄
+  //     nullptr); // 附加参数
+  //
+  // // 显示和更新窗口
+  // ShowWindow(hWnd, SW_SHOW);
+  // UpdateWindow(hWnd);
+
   KeyHookManager.keyHook = SetWindowsHookEx(
       WINDOWS_HOOK_ID.WH_KEYBOARD_LL, lpfn.nativeFunction, NULL, 0);
 
   KeyHookManager.mouseHook = SetWindowsHookEx(
       WINDOWS_HOOK_ID.WH_MOUSE_LL, lpmousefn.nativeFunction, NULL, 0);
 
-  final msg = calloc<MSG>();
-  while (GetMessage(msg, NULL, 0, 0) != 0) {
-    TranslateMessage(msg);
-    DispatchMessage(msg);
-  }
+  Future.doWhile(() async {
+    final msg = calloc<MSG>();
+    final start = DateTime.now().millisecondsSinceEpoch;
+    while (PeekMessage(msg, NULL, 0, 0, PEEK_MESSAGE_REMOVE_TYPE.PM_REMOVE) != 0) {
+      TranslateMessage(msg);
+      DispatchMessage(msg);
+    }
+    final cost = DateTime.now().millisecondsSinceEpoch - start;
+    if (cost > 10) {
+      log('cost: $cost');
+    }
+    calloc.free(msg);
+    await Future.delayed(const Duration(milliseconds: 1));
+    return true;
+  });
 }
+
+
 
 class KeyHookManager {
   static void init() {
@@ -108,7 +176,7 @@ class KeyHookManager {
   }
 
   static void onKeyEvent(KeyEvent event) {
-    log('onKeyEvent: $event');
+    // log('onKeyEvent: $event');
     final needRemoveListeners = <KeyListener>[];
     for (final listener in _listeners) {
       if (listener(event)) {
@@ -158,29 +226,31 @@ class KeyHookManager {
   }
 
   static void sendInput(KeyEvent event) {
-    if (event.keyCode == mouseLeftButton) {
-      final mouseInput = calloc<MOUSEINPUT>();
-      mouseInput.ref.dwFlags = event.type == EventType.keyDown ? MOUSE_EVENT_FLAGS.MOUSEEVENTF_LEFTDOWN : MOUSE_EVENT_FLAGS.MOUSEEVENTF_LEFTUP;
-
+    if (event.keyCode == mouseLButton) {
       final input = calloc<INPUT>();
-
       input.ref.type = INPUT_TYPE.INPUT_MOUSE;
-      input.ref.mi = mouseInput.ref;
+      input.ref.mi.dx = 0;
+      input.ref.mi.dy = 0;
+      input.ref.mi.mouseData = 0;
+      input.ref.mi.dwFlags = event.type == EventType.keyDown ? MOUSE_EVENT_FLAGS.MOUSEEVENTF_LEFTDOWN : MOUSE_EVENT_FLAGS.MOUSEEVENTF_LEFTUP;
+      input.ref.mi.time = 0;
+      input.ref.mi.dwExtraInfo = 0;
 
-      SendInput(1, Pointer.fromAddress(input.address), sizeOf<MOUSEINPUT>());
-      calloc.free(mouseInput);
+      // 模拟鼠标左键按下
+      SendInput(1, input, sizeOf<INPUT>());
       calloc.free(input);
-    } else if (event.keyCode == mouseRightButton) {
-      final mouseInput = calloc<MOUSEINPUT>();
-      mouseInput.ref.dwFlags = event.type == EventType.keyDown ? MOUSE_EVENT_FLAGS.MOUSEEVENTF_RIGHTDOWN : MOUSE_EVENT_FLAGS.MOUSEEVENTF_RIGHTUP;
-
+    } else if (event.keyCode == mouseRButton) {
       final input = calloc<INPUT>();
-
       input.ref.type = INPUT_TYPE.INPUT_MOUSE;
-      input.ref.mi = mouseInput.ref;
+      input.ref.mi.dx = 0;
+      input.ref.mi.dy = 0;
+      input.ref.mi.mouseData = 0;
+      input.ref.mi.dwFlags = event.type == EventType.keyDown ? MOUSE_EVENT_FLAGS.MOUSEEVENTF_RIGHTDOWN : MOUSE_EVENT_FLAGS.MOUSEEVENTF_RIGHTUP;
+      input.ref.mi.time = 0;
+      input.ref.mi.dwExtraInfo = 0;
 
-      SendInput(1, Pointer.fromAddress(input.address), sizeOf<MOUSEINPUT>());
-      calloc.free(mouseInput);
+      // 模拟鼠标左键按下
+      SendInput(1, input, sizeOf<INPUT>());
       calloc.free(input);
     } else {
       final input = calloc<INPUT>();
@@ -201,6 +271,9 @@ class KeyHookManager {
     addListener(listener);
     if (timeout != null && timeout > 0) {
       controller.future.timeout(Duration(milliseconds: timeout), onTimeout: () {
+        if (controller.isCompleted) {
+          return null;
+        }
         controller.complete(null);
         removeListener(listener);
         return null;

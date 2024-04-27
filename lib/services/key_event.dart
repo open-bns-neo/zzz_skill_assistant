@@ -2,15 +2,15 @@ import 'package:win32/win32.dart';
 
 enum EventType { keyDown, keyUp }
 
-const mouseLeftButton = 1000;
-const mouseRightButton = 1001;
+const mouseLButton = 1000;
+const mouseRButton = 1001;
 const mouseXButton = 1003;
 
 class KeyEvent {
   static final _keyCodeNameMap = <int, String>{
     mouseXButton : "MouseX",
-    mouseLeftButton : "MouseLeft",
-    mouseRightButton : "MouseRight",
+    mouseLButton : "MouseLeft",
+    mouseRButton : "MouseRight",
     VIRTUAL_KEY.VK_0 : "0",
     VIRTUAL_KEY.VK_1 : "1",
     VIRTUAL_KEY.VK_2 : "2",
@@ -47,6 +47,7 @@ class KeyEvent {
     VIRTUAL_KEY.VK_X : "X",
     VIRTUAL_KEY.VK_Y : "Y",
     VIRTUAL_KEY.VK_Z : "Z",
+    VIRTUAL_KEY.VK_LCONTROL : "LCtrl",
   };
 
   int keyCode = 0;

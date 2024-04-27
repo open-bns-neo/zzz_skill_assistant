@@ -10,8 +10,14 @@ class SkillComboService {
   }
 
   final skillCombos = <SkillCombo>[
+    PickColor(),
     TestSkillCombo(),
     SSCombo(),
+    // JianShiCombo(),
+    QiGongComboSkillL(),
+    QiGongComboSkill2(),
+    QiGongComboSkillFIce(),
+    QiGongComboSkillFFire(),
   ];
 
   void start() {

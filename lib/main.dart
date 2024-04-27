@@ -1,8 +1,10 @@
 import 'package:bns_skill_assistant/services/key_hook_manager.dart';
 import 'package:bns_skill_assistant/services/skill_combo_service.dart';
+import 'package:bns_skill_assistant/tools/screen_color_picker.dart';
 import 'package:flutter/material.dart';
 
 void main() {
+  // ScreenColorPicker.pickColorAsync();
   KeyHookManager.init();
   SkillComboService().start();
   runApp(const MyApp());

@@ -4,15 +4,23 @@ import 'dart:ffi';
 import 'dart:isolate';
 
 import 'package:flutter/foundation.dart';
+import 'package:json_annotation/json_annotation.dart';
 import 'package:win32/win32.dart';
 import 'package:ffi/ffi.dart';
 
+part 'screen_color_picker.g.dart';
+
+@JsonSerializable()
 class Pixel {
   final int x;
   final int y;
   final int color;
 
   Pixel(this.x, this.y, this.color);
+
+  factory Pixel.fromJson(Map<String, dynamic> json) => _$PixelFromJson(json);
+
+  Map<String, dynamic> toJson() => _$PixelToJson(this);
 }
 
 class ScreenColorPicker {

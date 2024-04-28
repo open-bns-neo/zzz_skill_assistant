@@ -1,7 +1,12 @@
+import 'package:bns_skill_assistant/controller/cache_manager.dart';
 import 'package:bns_skill_assistant/services/skill_combo.dart';
 import 'package:bns_skill_assistant/services/skill_combo_service.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:json_annotation/json_annotation.dart';
 
+part 'skill_data_controller.g.dart';
+
+@JsonSerializable()
 class TabPageController extends ChangeNotifier {
   final String title;
   final List<SkillComboController> skills;
@@ -35,6 +40,10 @@ class TabPageController extends ChangeNotifier {
     skills.remove(skill);
     notifyListeners();
   }
+
+  factory TabPageController.fromJson(Map<String, dynamic> json) => _$TabPageControllerFromJson(json);
+
+  Map<String, dynamic> toJson() => _$TabPageControllerToJson(this);
 }
 
 class _MySkillCombo extends SkillCombo {
@@ -46,9 +55,9 @@ class _MySkillCombo extends SkillCombo {
   List<SkillAction> getActions() {
     return actions;
   }
-
 }
 
+@JsonSerializable()
 class SkillComboController extends ChangeNotifier {
   String name;
   final List<SkillAction> actions = [];
@@ -73,8 +82,13 @@ class SkillComboController extends ChangeNotifier {
     actions.remove(action);
     notifyListeners();
   }
+
+  factory SkillComboController.fromJson(Map<String, dynamic> json) => _$SkillComboControllerFromJson(json);
+
+  Map<String, dynamic> toJson() => _$SkillComboControllerToJson(this);
 }
 
+@JsonSerializable()
 class SkillDataController extends ChangeNotifier {
   static Map<Type, String> get skillTypes => {
     WaitAction: '延迟',
@@ -84,16 +98,25 @@ class SkillDataController extends ChangeNotifier {
     // WaitComposeKeyAction: '等待组合键',
   };
 
-  final List<TabPageController> tabs = [
+  static final List<TabPageController> defaultTabs = [
     TabPageController('剑士', skills: []),
   ];
+
+  final List<TabPageController> tabs;
+
+  SkillDataController({List<TabPageController>? tabs}) : tabs = tabs ?? defaultTabs;
 
   Future<void> init() async {
     for (final element in tabs) {
       element.addListener(() {
         notifyListeners();
+        CacheManager.save(toJson());
       });
     }
     notifyListeners();
   }
+
+  factory SkillDataController.fromJson(Map<String, dynamic> json) => _$SkillDataControllerFromJson(json);
+
+  Map<String, dynamic> toJson() => _$SkillDataControllerToJson(this);
 }

@@ -1,4 +1,7 @@
+import 'package:json_annotation/json_annotation.dart';
 import 'package:win32/win32.dart';
+
+part 'key_event.g.dart';
 
 enum EventType { keyDown, keyUp }
 
@@ -6,6 +9,7 @@ const mouseLButton = 1000;
 const mouseRButton = 1001;
 const mouseXButton = 1003;
 
+@JsonSerializable()
 class KeyEvent {
   static final _keyCodeNameMap = <int, String>{
     mouseXButton : "MouseX",
@@ -67,4 +71,8 @@ class KeyEvent {
 
   @override
   int get hashCode => keyCode.hashCode ^ type.hashCode;
+
+  factory KeyEvent.fromJson(Map<String, dynamic> json) => _$KeyEventFromJson(json);
+
+  Map<String, dynamic> toJson() => _$KeyEventToJson(this);
 }

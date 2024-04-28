@@ -3,7 +3,10 @@ import 'dart:developer';
 import 'package:bns_skill_assistant/services/key_event.dart';
 import 'package:bns_skill_assistant/services/key_hook_manager.dart';
 import 'package:bns_skill_assistant/tools/screen_color_picker.dart';
+import 'package:json_annotation/json_annotation.dart';
 import 'package:win32/win32.dart';
+
+part 'skill_combo.g.dart';
 
 class ActionContext {
 }
@@ -21,9 +24,43 @@ enum ActionType {
 
 abstract interface class SkillAction {
   Future<bool> execute(ActionContext context);
+
+  factory SkillAction.fromJson(Map<String, dynamic> json) {
+    final type = json['type'];
+    if (type == _$ActionTypeEnumMap[ActionType.waitForKey]) {
+      return WaitForKeyAction.fromJson(json);
+    }
+    if (type == _$ActionTypeEnumMap[ActionType.waitForClick]) {
+      return WaitForClickAction.fromJson(json);
+    }
+    if (type == _$ActionTypeEnumMap[ActionType.waitForDoubleClick]) {
+      return WaitForDoubleClickAction.fromJson(json);
+    }
+    if (type == _$ActionTypeEnumMap[ActionType.pressKey]) {
+      return PressKeyAction.fromJson(json);
+    }
+    if (type == _$ActionTypeEnumMap[ActionType.wait]) {
+      return WaitAction.fromJson(json);
+    }
+    if (type == _$ActionTypeEnumMap[ActionType.screenColorPicker]) {
+      return ScreenColorPickerAction.fromJson(json);
+    }
+    if (type == _$ActionTypeEnumMap[ActionType.waitComposeKey]) {
+      return WaitComposeKeyAction.fromJson(json);
+    }
+    if (type == _$ActionTypeEnumMap[ActionType.colorTest]) {
+      return ColorTestAction.fromJson(json);
+    }
+    throw 'Unknown type: $type';
+  }
+
+  Map<String, dynamic> toJson();
 }
 
+@JsonSerializable()
 class WaitForKeyAction implements SkillAction {
+  @JsonKey(includeToJson: true, includeFromJson: true)
+  final type = ActionType.waitForKey;
   KeyEvent event;
   final int? timeout;
   WaitForKeyAction(this.event, {this.timeout});
@@ -32,9 +69,17 @@ class WaitForKeyAction implements SkillAction {
   Future<bool> execute(ActionContext context) async {
     return await KeyHookManager.waitKey(event, timeout: timeout);
   }
+
+  factory WaitForKeyAction.fromJson(Map<String, dynamic> json) => _$WaitForKeyActionFromJson(json);
+
+  @override
+  Map<String, dynamic> toJson() => _$WaitForKeyActionToJson(this);
 }
 
+@JsonSerializable()
 class WaitForClickAction implements SkillAction {
+  @JsonKey(includeToJson: true, includeFromJson: true)
+  final type = ActionType.waitForClick;
   final KeyEvent event;
   final int? timeout;
   WaitForClickAction(this.event, {this.timeout});
@@ -48,9 +93,17 @@ class WaitForClickAction implements SkillAction {
 
     return await KeyHookManager.waitKey(KeyEvent(keyCode: event.keyCode, type: EventType.keyUp), timeout: 300);
   }
+
+  factory WaitForClickAction.fromJson(Map<String, dynamic> json) => _$WaitForClickActionFromJson(json);
+
+  @override
+  Map<String, dynamic> toJson() => _$WaitForClickActionToJson(this);
 }
 
+@JsonSerializable()
 class WaitForDoubleClickAction implements SkillAction {
+  @JsonKey(includeToJson: true, includeFromJson: true)
+  final type = ActionType.waitForDoubleClick;
   final KeyEvent event;
   final int? timeout;
   WaitForDoubleClickAction(this.event, {this.timeout});
@@ -65,9 +118,17 @@ class WaitForDoubleClickAction implements SkillAction {
     ret = await WaitForClickAction(event, timeout: 300).execute(context);
     return ret;
   }
+
+  factory WaitForDoubleClickAction.fromJson(Map<String, dynamic> json) => _$WaitForDoubleClickActionFromJson(json);
+
+  @override
+  Map<String, dynamic> toJson() => _$WaitForDoubleClickActionToJson(this);
 }
 
+@JsonSerializable()
 class PressKeyAction implements SkillAction {
+  @JsonKey(includeToJson: true, includeFromJson: true)
+  final type = ActionType.pressKey;
   final KeyEvent event;
   PressKeyAction(this.event);
 
@@ -80,9 +141,17 @@ class PressKeyAction implements SkillAction {
     KeyHookManager.sendInput(upEvent);
     return true;
   }
+
+  factory PressKeyAction.fromJson(Map<String, dynamic> json) => _$PressKeyActionFromJson(json);
+
+  @override
+  Map<String, dynamic> toJson() => _$PressKeyActionToJson(this);
 }
 
+@JsonSerializable()
 class WaitAction implements SkillAction {
+  @JsonKey(includeToJson: true, includeFromJson: true)
+  final type = ActionType.wait;
   int duration;
   WaitAction(this.duration);
 
@@ -91,9 +160,17 @@ class WaitAction implements SkillAction {
     await Future.delayed(Duration(milliseconds: duration));
     return true;
   }
+
+  factory WaitAction.fromJson(Map<String, dynamic> json) => _$WaitActionFromJson(json);
+
+  @override
+  Map<String, dynamic> toJson() => _$WaitActionToJson(this);
 }
 
+@JsonSerializable()
 class ScreenColorPickerAction implements SkillAction {
+  @JsonKey(includeToJson: true, includeFromJson: true)
+  final type = ActionType.screenColorPicker;
   Pixel? color;
   ScreenColorPickerAction();
 
@@ -104,9 +181,17 @@ class ScreenColorPickerAction implements SkillAction {
     log('颜色: ${color?.color} #${color?.color.toRadixString(16).padLeft(6, '0').toUpperCase()}');
     return color != null;
   }
+
+  factory ScreenColorPickerAction.fromJson(Map<String, dynamic> json) => _$ScreenColorPickerActionFromJson(json);
+
+  @override
+  Map<String, dynamic> toJson() => _$ScreenColorPickerActionToJson(this);
 }
 
+@JsonSerializable()
 class WaitComposeKeyAction implements SkillAction {
+  @JsonKey(includeToJson: true, includeFromJson: true)
+  final type = ActionType.waitComposeKey;
   final List<int> events;
   WaitComposeKeyAction(this.events);
 
@@ -120,9 +205,17 @@ class WaitComposeKeyAction implements SkillAction {
     }
     return true;
   }
+
+  factory WaitComposeKeyAction.fromJson(Map<String, dynamic> json) => _$WaitComposeKeyActionFromJson(json);
+
+  @override
+  Map<String, dynamic> toJson() => _$WaitComposeKeyActionToJson(this);
 }
 
+@JsonSerializable()
 class ColorTestAction implements SkillAction {
+  @JsonKey(includeToJson: true, includeFromJson: true)
+  final type = ActionType.colorTest;
   Pixel pixel;
   ColorTestAction(this.pixel);
 
@@ -133,6 +226,11 @@ class ColorTestAction implements SkillAction {
     // log('ColorTestAction 颜色: $pix ${pixel.color}');
     return pix == pixel.color;
   }
+
+  factory ColorTestAction.fromJson(Map<String, dynamic> json) => _$ColorTestActionFromJson(json);
+
+  @override
+  Map<String, dynamic> toJson() => _$ColorTestActionToJson(this);
 }
 
 abstract class SkillCombo {

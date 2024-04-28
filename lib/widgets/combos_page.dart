@@ -39,7 +39,9 @@ class _CombosPageState extends State<CombosPage> {
             },
           ),
         ),
-        const Spacer(),
+        const SizedBox(
+          height: 40,
+        ),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [

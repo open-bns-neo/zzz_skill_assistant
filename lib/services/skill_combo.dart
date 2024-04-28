@@ -8,12 +8,23 @@ import 'package:win32/win32.dart';
 class ActionContext {
 }
 
-abstract interface class Action {
+enum ActionType {
+  waitForKey,
+  waitForClick,
+  waitForDoubleClick,
+  pressKey,
+  wait,
+  screenColorPicker,
+  waitComposeKey,
+  colorTest,
+}
+
+abstract interface class SkillAction {
   Future<bool> execute(ActionContext context);
 }
 
-class WaitForKeyAction implements Action {
-  final KeyEvent event;
+class WaitForKeyAction implements SkillAction {
+  KeyEvent event;
   final int? timeout;
   WaitForKeyAction(this.event, {this.timeout});
 
@@ -23,7 +34,7 @@ class WaitForKeyAction implements Action {
   }
 }
 
-class WaitForClickAction implements Action {
+class WaitForClickAction implements SkillAction {
   final KeyEvent event;
   final int? timeout;
   WaitForClickAction(this.event, {this.timeout});
@@ -39,7 +50,7 @@ class WaitForClickAction implements Action {
   }
 }
 
-class WaitForDoubleClickAction implements Action {
+class WaitForDoubleClickAction implements SkillAction {
   final KeyEvent event;
   final int? timeout;
   WaitForDoubleClickAction(this.event, {this.timeout});
@@ -56,7 +67,7 @@ class WaitForDoubleClickAction implements Action {
   }
 }
 
-class PressKeyAction implements Action {
+class PressKeyAction implements SkillAction {
   final KeyEvent event;
   PressKeyAction(this.event);
 
@@ -71,8 +82,8 @@ class PressKeyAction implements Action {
   }
 }
 
-class WaitAction implements Action {
-  final int duration;
+class WaitAction implements SkillAction {
+  int duration;
   WaitAction(this.duration);
 
   @override
@@ -82,19 +93,20 @@ class WaitAction implements Action {
   }
 }
 
-class ScreenColorPickerAction implements Action {
+class ScreenColorPickerAction implements SkillAction {
+  Pixel? color;
   ScreenColorPickerAction();
 
   @override
   Future<bool> execute(ActionContext context) async {
-    final color = await ScreenColorPicker.pickColorAsync();
+    color = await ScreenColorPicker.pickColorAsync();
     log('鼠标位置: (${color?.x}, ${color?.y})');
     log('颜色: ${color?.color} #${color?.color.toRadixString(16).padLeft(6, '0').toUpperCase()}');
     return color != null;
   }
 }
 
-class WaitComposeKeyAction implements Action {
+class WaitComposeKeyAction implements SkillAction {
   final List<int> events;
   WaitComposeKeyAction(this.events);
 
@@ -110,8 +122,8 @@ class WaitComposeKeyAction implements Action {
   }
 }
 
-class ColorTestAction implements Action {
-  final Pixel pixel;
+class ColorTestAction implements SkillAction {
+  Pixel pixel;
   ColorTestAction(this.pixel);
 
   @override
@@ -124,7 +136,7 @@ class ColorTestAction implements Action {
 }
 
 abstract class SkillCombo {
-  List<Action> getActions();
+  List<SkillAction> getActions();
 
   Future<void> start() async {
     active = true;
@@ -167,7 +179,7 @@ abstract class SkillCombo {
 
 class TestSkillCombo extends SkillCombo {
   @override
-  List<Action> getActions() {
+  List<SkillAction> getActions() {
     return [
       WaitAction(100),
     ];
@@ -176,7 +188,7 @@ class TestSkillCombo extends SkillCombo {
 
 class PickColor extends SkillCombo {
   @override
-  List<Action> getActions() {
+  List<SkillAction> getActions() {
     return [
       WaitComposeKeyAction([VIRTUAL_KEY.VK_LCONTROL, VIRTUAL_KEY.VK_P]),
       WaitAction(100),
@@ -187,7 +199,7 @@ class PickColor extends SkillCombo {
 
 class JianShiCombo extends SkillCombo {
   @override
-  List<Action> getActions() {
+  List<SkillAction> getActions() {
     return [
       WaitForKeyAction(KeyEvent(keyCode: mouseLButton)),
       ColorTestAction(Pixel(1871, 1979, 15558)),
@@ -198,7 +210,7 @@ class JianShiCombo extends SkillCombo {
 
 class QiGongComboSkillL extends SkillCombo {
   @override
-  List<Action> getActions() {
+  List<SkillAction> getActions() {
     return [
       WaitForKeyAction(KeyEvent(keyCode: mouseRButton)),
       WaitAction(500),
@@ -210,7 +222,7 @@ class QiGongComboSkillL extends SkillCombo {
 
 class QiGongComboSkill2 extends SkillCombo {
   @override
-  List<Action> getActions() {
+  List<SkillAction> getActions() {
     return [
       WaitForKeyAction(KeyEvent(keyCode: mouseRButton)),
       WaitAction(500),
@@ -222,7 +234,7 @@ class QiGongComboSkill2 extends SkillCombo {
 
 class QiGongComboSkillFIce extends SkillCombo {
   @override
-  List<Action> getActions() {
+  List<SkillAction> getActions() {
     return [
       WaitAction(50),
       ColorTestAction(Pixel(2376, 1294, 7551515)),
@@ -233,7 +245,7 @@ class QiGongComboSkillFIce extends SkillCombo {
 
 class QiGongComboSkillFFire extends SkillCombo {
   @override
-  List<Action> getActions() {
+  List<SkillAction> getActions() {
     return [
       WaitAction(50),
       ColorTestAction(Pixel(2372, 1297, 8321279)),
@@ -244,7 +256,7 @@ class QiGongComboSkillFFire extends SkillCombo {
 
 class SSCombo extends SkillCombo {
   @override
-  List<Action> getActions() {
+  List<SkillAction> getActions() {
     return [
       WaitForClickAction(KeyEvent(keyCode: mouseXButton),),
       WaitAction(100),

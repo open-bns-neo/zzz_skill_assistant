@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'dart:ffi';
 import 'dart:isolate';
 
+import 'package:flutter/foundation.dart';
 import 'package:win32/win32.dart';
 import 'package:ffi/ffi.dart';
 
@@ -18,6 +19,9 @@ class ScreenColorPicker {
   static int _globalScreenSnapshot = 0;
   static bool _isColorPicking = false;
   static Completer<Pixel?>? _completer;
+  static final _pickColorNotifier = ValueNotifier<Pixel?>(null);
+
+  static ValueNotifier<Pixel?> get pickColorNotifier => _pickColorNotifier;
 
   static Future<Pixel?> pickColorAsync() async {
     if (_isColorPicking) {
@@ -29,6 +33,7 @@ class ScreenColorPicker {
     pickColor();
     final color = await _completer!.future;
     _isColorPicking = false;
+    _pickColorNotifier.value = color;
     return color;
   }
 

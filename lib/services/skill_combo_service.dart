@@ -5,24 +5,42 @@ class SkillComboService {
 
   static final SkillComboService _instance = SkillComboService._privateConstructor();
 
+  List<SkillCombo> _runningCombos = [];
+
   factory SkillComboService() {
     return _instance;
   }
 
-  final skillCombos = <SkillCombo>[
+  final _backgroundCombos = <SkillCombo>[
     PickColor(),
-    TestSkillCombo(),
-    SSCombo(),
-    // JianShiCombo(),
-    QiGongComboSkillL(),
-    QiGongComboSkill2(),
-    QiGongComboSkillFIce(),
-    QiGongComboSkillFFire(),
   ];
 
-  void start() {
-    for (var combo in skillCombos) {
+  void init() {
+    for (var combo in _backgroundCombos) {
       combo.start();
     }
+  }
+
+  void startCombo(List<SkillCombo> combos) {
+    if (combos.isEmpty) {
+      return;
+    }
+
+    if (_runningCombos.isNotEmpty) {
+      stopCombo();
+    }
+
+    _runningCombos = combos;
+
+    for (var combo in _runningCombos) {
+      combo.start();
+    }
+  }
+
+  void stopCombo() {
+    for (var combo in _runningCombos) {
+      combo.stop();
+    }
+    _runningCombos.clear();
   }
 }

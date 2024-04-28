@@ -120,31 +120,6 @@ int mainWindowProc(int hWnd, int uMsg, int wParam, int lParam) {
 
 // 运行在新 Isolate 中的函数
 void isolateEntry(SendPort sendPort) async {
-  // final hInstance = GetModuleHandle(nullptr);
-  // final wndClass = calloc<WNDCLASS>();
-  // wndClass.ref.lpfnWndProc = Pointer.fromFunction<WNDPROC>(windowProc, 0);
-  // wndClass.ref.hInstance = hInstance;
-  // wndClass.ref.lpszClassName = TEXT('test');
-  // RegisterClass(wndClass);
-  //
-  // final hWnd = CreateWindowEx(
-  //     0, // 扩展窗口样式
-  //     wndClass.ref.lpszClassName, // 窗口类名
-  //     TEXT('Sample Window'), // 窗口标题
-  //     WS_OVERLAPPEDWINDOW, // 窗口样式
-  //     CW_USEDEFAULT, // 窗口位置 X
-  //     CW_USEDEFAULT, // 窗口位置 Y
-  //     CW_USEDEFAULT, // 窗口宽度
-  //     CW_USEDEFAULT, // 窗口高度
-  //     NULL, // 父窗口句柄
-  //     NULL, // 菜单句柄
-  //     wndClass.ref.hInstance, // 应用程序实例句柄
-  //     nullptr); // 附加参数
-  //
-  // // 显示和更新窗口
-  // ShowWindow(hWnd, SW_SHOW);
-  // UpdateWindow(hWnd);
-
   KeyHookManager.keyHook = SetWindowsHookEx(
       WINDOWS_HOOK_ID.WH_KEYBOARD_LL, lpfn.nativeFunction, NULL, 0);
 

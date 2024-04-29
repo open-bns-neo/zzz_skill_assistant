@@ -165,7 +165,7 @@ class ComboActiveManager extends ChangeNotifier {
     }
     _isActive = true;
     _activeController = controller;
-    final combos = _activeController!.skills.map((e) => _MySkillCombo(e.actions));
+    final combos = _activeController!.skills.where((element) => element.active).map((e) => _MySkillCombo(e.actions));
     SkillComboService().startCombo(combos.toList());
 
     notifyListeners();

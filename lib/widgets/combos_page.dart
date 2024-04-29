@@ -1,6 +1,8 @@
 import 'package:bns_skill_assistant/controller/skill_data_controller.dart';
 import 'package:bns_skill_assistant/widgets/delete_widget.dart';
 import 'package:bns_skill_assistant/widgets/util/notification.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/widgets.dart';
 import 'package:toastification/toastification.dart' as toast;
 import 'package:flutter/material.dart';
 
@@ -41,46 +43,22 @@ class _CombosPageState extends State<CombosPage> {
     final tab = widget._controller;
     return Column(
       children: [
-        ListView.builder(
-          shrinkWrap: true,
-          itemCount: tab.skills.length,
-          itemBuilder: (context, index) {
-            final skill = tab.skills[index];
-            return Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Expanded(
-                      child: ComboWidget(skill),
-                    ),
-                    Column(
-                      children: [
-                        _buildLockIcon(skill),
-                        if (!skill.lock)
-                          DeleteWidget(
-                            onDelete: () {
-                              tab.removeSkill(skill);
-                            },
-                          ),
-                      ],
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10,),
-              ],
-            );
-          },
+        Expanded(
+          child: ListView(
+            shrinkWrap: true,
+            children: [
+              for (final skill in tab.skills)
+                _buildSkill(skill),
+            ],
+          ),
         ),
-        const SizedBox(height: 10,),
         ElevatedButton(
           onPressed: () {
             tab.addSkill(SkillComboController());
           },
           child: const Text('添加卡刀组'),
         ),
-        const Spacer(
-        ),
+        const SizedBox(height: 10,),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -102,6 +80,36 @@ class _CombosPageState extends State<CombosPage> {
           ],
         ),
       ],
+    );
+  }
+
+  Widget _buildSkill(SkillComboController skill) {
+    return Container(
+      padding: const EdgeInsets.only(left: 10, right: 10),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Expanded(
+                child: ComboWidget(skill),
+              ),
+              Column(
+                children: [
+                  _buildLockIcon(skill),
+                  if (!skill.lock)
+                    DeleteWidget(
+                      onDelete: () {
+                        widget._controller.removeSkill(skill);
+                      },
+                    ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 10,),
+        ],
+      ),
     );
   }
 

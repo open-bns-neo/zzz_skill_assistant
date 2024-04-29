@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:bns_skill_assistant/services/key_event.dart';
@@ -199,7 +200,7 @@ class WaitComposeKeyAction implements SkillAction {
   Future<bool> execute(ActionContext context) async {
     for (final event in events) {
       final ret = await KeyHookManager.nextKey(timeout: 1000);
-      if (ret?.keyCode != event) {
+      if (ret?.keyCode != event || ret?.type != EventType.keyDown) {
         return false;
       }
     }
@@ -231,6 +232,22 @@ class ColorTestAction implements SkillAction {
 
   @override
   Map<String, dynamic> toJson() => _$ColorTestActionToJson(this);
+}
+
+class CustomAction implements SkillAction {
+  final FutureOr<bool> Function() action;
+  CustomAction(this.action);
+
+  @override
+  Future<bool> execute(ActionContext context) async {
+    final ret = await action();
+    return ret;
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    return {};
+  }
 }
 
 abstract class SkillCombo {
@@ -292,6 +309,17 @@ class PickColor extends SkillCombo {
       WaitAction(100),
       ScreenColorPickerAction(),
     ];
+  }
+}
+
+class CustomCombo extends SkillCombo {
+  final List<SkillAction> actions;
+
+  CustomCombo(this.actions);
+
+  @override
+  List<SkillAction> getActions() {
+    return actions;
   }
 }
 

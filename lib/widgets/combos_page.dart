@@ -59,7 +59,7 @@ class _CombosPageState extends State<CombosPage> {
           child: const Text('添加卡刀组'),
         ),
         const SizedBox(height: 10,),
-        Row(
+        Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             ElevatedButton(
@@ -76,6 +76,14 @@ class _CombosPageState extends State<CombosPage> {
                 }
               },
               child: isActive() ? Text('取消激活', style: TextStyle(color: Theme.of(context).colorScheme.error),) : const Text('激活'),
+            ),
+            const SizedBox(width: 5,),
+            const Text(
+              '快捷键: Ctrl + K',
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey,
+              ),
             ),
           ],
         ),

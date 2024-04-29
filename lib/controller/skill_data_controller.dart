@@ -150,13 +150,14 @@ class ComboActiveManager extends ChangeNotifier {
 
   bool _isActive = false;
   TabPageController? _activeController;
+  TabPageController? _currentController;
 
   bool get isActive => _isActive;
 
   TabPageController? get activeController => _activeController;
 
-  void activeSkillCombo() {
-
+  set currentController(TabPageController? controller) {
+    _currentController = controller;
   }
 
   void active(TabPageController controller) {
@@ -169,6 +170,14 @@ class ComboActiveManager extends ChangeNotifier {
     SkillComboService().startCombo(combos.toList());
 
     notifyListeners();
+  }
+
+  void activeDefault() {
+    final controller = _activeController ?? _currentController;
+    if (controller == null) {
+      return;
+    }
+    active(controller);
   }
 
   void disable() {

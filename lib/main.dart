@@ -71,17 +71,27 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       log('Load cache error: $e');
     }
 
-    _tabController = TabController(length: _controller.tabs.length, vsync: this);
+    _initTabController();
     _controller.init();
+    if (_controller.tabs.isNotEmpty) {
+      ComboActiveManager().currentController = _controller.tabs[0];
+    }
     _controller.addListener(() {
       setState(() {
         _tabController.dispose();
-        _tabController = TabController(length: _controller.tabs.length, vsync: this);
+        _initTabController();
       });
     });
 
     setState(() {
       _isInit = true;
+    });
+  }
+
+  void _initTabController() {
+    _tabController = TabController(length: _controller.tabs.length, vsync: this);
+    _tabController.addListener(() {
+      ComboActiveManager().currentController = _controller.tabs[_tabController.index];
     });
   }
 

@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:bns_skill_assistant/services/key_hook_manager.dart';
 import 'package:bns_skill_assistant/services/skill_combo.dart';
+import 'package:bns_skill_assistant/widgets/delete_widget.dart';
 import 'package:bns_skill_assistant/widgets/util/key_image_loader.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -14,8 +15,9 @@ import '../tools/screen_color_picker.dart';
 class ActionWidget extends StatefulWidget {
   final SkillAction action;
   final Function()? onDeleted;
+  final Function()? onChanged;
 
-  const ActionWidget(this.action, {super.key, this.onDeleted});
+  const ActionWidget(this.action, {super.key, this.onDeleted, this.onChanged});
 
   @override
   State createState() {
@@ -61,6 +63,7 @@ class _ActionWidgetState<T extends SkillAction> extends State<ActionWidget> {
     setState(() {
       _isEditing = false;
     });
+    widget.onChanged?.call();
   }
 
   void onEdit() {
@@ -69,7 +72,6 @@ class _ActionWidgetState<T extends SkillAction> extends State<ActionWidget> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.only(bottom: 10),
       child: Row(
         children: [
           if (_isEditing)
@@ -83,9 +85,11 @@ class _ActionWidgetState<T extends SkillAction> extends State<ActionWidget> {
             IconButton(
               icon: const Icon(Icons.save),
               onPressed: save,
+              tooltip: "保存",
             )
           else
             Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 SizedBox(
                   height: 30,
@@ -95,6 +99,7 @@ class _ActionWidgetState<T extends SkillAction> extends State<ActionWidget> {
                       Icons.edit,
                       size: 15,
                     ),
+                    tooltip: "编辑",
                     onPressed: () {
                       setState(() {
                         onEdit();
@@ -106,13 +111,9 @@ class _ActionWidgetState<T extends SkillAction> extends State<ActionWidget> {
                 SizedBox(
                   height: 30,
                   width: 30,
-                  child: IconButton(
-                    icon: Icon(
-                      Icons.delete_forever,
-                      size: 15,
-                      color: Theme.of(context).colorScheme.error,
-                    ),
-                    onPressed: () {
+                  child: DeleteWidget(
+                    size: 15,
+                    onDelete: () {
                       setState(() {
                         widget.onDeleted?.call();
                       });
@@ -261,6 +262,18 @@ class _ColorTestActionState extends _ActionWidgetState<ColorTestAction> {
   @override
   void initState() {
     super.initState();
+    ScreenColorPicker.pickColorNotifier.addListener(onColorPicked);
+  }
+
+  @override
+  void save() {
+    super.save();
+    ScreenColorPicker.pickColorNotifier.removeListener(onColorPicked);
+  }
+
+  @override
+  void onEdit() {
+    super.onEdit();
     ScreenColorPicker.pickColorNotifier.addListener(onColorPicked);
   }
 

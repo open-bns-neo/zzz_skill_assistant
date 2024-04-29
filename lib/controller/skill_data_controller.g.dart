@@ -23,10 +23,11 @@ Map<String, dynamic> _$TabPageControllerToJson(TabPageController instance) =>
 SkillComboController _$SkillComboControllerFromJson(
         Map<String, dynamic> json) =>
     SkillComboController(
-      name: json['name'] as String? ?? '未命名',
+      name: json['name'] as String? ?? '',
       actions: (json['actions'] as List<dynamic>?)
           ?.map((e) => SkillAction.fromJson(e as Map<String, dynamic>))
           .toList(),
+      active: json['active'] as bool? ?? true,
     );
 
 Map<String, dynamic> _$SkillComboControllerToJson(
@@ -34,6 +35,7 @@ Map<String, dynamic> _$SkillComboControllerToJson(
     <String, dynamic>{
       'name': instance.name,
       'actions': instance.actions,
+      'active': instance.active,
     };
 
 SkillDataController _$SkillDataControllerFromJson(Map<String, dynamic> json) =>

@@ -17,12 +17,18 @@ class ComboWidget extends StatefulWidget {
 }
 
 class _ComboWidgetState extends State<ComboWidget> {
+  final _scrollController = ScrollController();
+
   @override
   Widget build(BuildContext context) {
     final skill = widget.skill;
-
     return Container(
-      padding: const EdgeInsets.only(bottom: 10),
+      height: 100,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        color: skill.active ? Theme.of(context).primaryColorLight : Theme.of(context).disabledColor,
+      ),
+      padding: const EdgeInsets.all(10),
       child: Row(
         children: [
           SizedBox(
@@ -38,6 +44,20 @@ class _ComboWidgetState extends State<ComboWidget> {
           Expanded(
             child: _buildSkillRow(skill.actions),
           ),
+          const SizedBox(
+            width: 20,
+          ),
+          Checkbox(
+            value: skill.active,
+            onChanged: (enable) {
+              if (enable == true) {
+                skill.active = true;
+              } else {
+                skill.active = false;
+              }
+              skill.onChange();
+            },
+          ),
         ],
       ),
     );
@@ -50,28 +70,45 @@ class _ComboWidgetState extends State<ComboWidget> {
       });
     }
 
-    return Row(
-      children: [
-        for (final action in actions)
-          ...[
-            ActionWidget(
-              key: ValueKey(action),
-              action,
-              onDeleted: () {
-                widget.skill.removeAction(action);
-              },
+    return Scrollbar(
+      controller: _scrollController,
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 2),
+        child: ListView(
+          scrollDirection: Axis.horizontal,
+          controller: _scrollController,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                for (final action in actions)
+                  ...[
+                    ActionWidget(
+                      key: ValueKey(action),
+                      action,
+                      onDeleted: () {
+                        widget.skill.removeAction(action);
+                      },
+                      onChanged: () {
+                        widget.skill.onChange();
+                      },
+                    ),
+                    Container(
+                      padding: const EdgeInsets.only(left: 10),
+                      width: 4,
+                      height: 40,
+                      color: Colors.redAccent,
+                    ),
+                    _buildAddActionMenu((newAction) {
+                      _addSkillAction(newAction, actions.indexOf(action) + 1);
+                    }),
+                  ]
+              ],
             ),
-            Container(
-              padding: const EdgeInsets.only(left: 10),
-              width: 4,
-              height: 30,
-              color: Colors.redAccent,
-            ),
-            _buildAddActionMenu((newAction) {
-              _addSkillAction(newAction, actions.indexOf(action) + 1);
-            }),
-          ]
-      ],
+          ],
+        ),
+      ),
     );
   }
 

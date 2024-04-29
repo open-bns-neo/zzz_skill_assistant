@@ -8,13 +8,8 @@ part 'skill_data_controller.g.dart';
 
 @JsonSerializable()
 class TabPageController extends ChangeNotifier {
-  final String title;
+  String title;
   final List<SkillComboController> skills;
-
-  void activeSkillCombo() {
-    final combos = skills.map((e) => _MySkillCombo(e.actions));
-    SkillComboService().startCombo(combos.toList());
-  }
 
   TabPageController(this.title, {required this.skills}) {
     for (final element in skills) {
@@ -61,8 +56,9 @@ class _MySkillCombo extends SkillCombo {
 class SkillComboController extends ChangeNotifier {
   String name;
   final List<SkillAction> actions = [];
+  bool active;
 
-  SkillComboController({this.name = '未命名', List<SkillAction>? actions}) {
+  SkillComboController({this.name = '', List<SkillAction>? actions, this.active = true}) {
     actions?.forEach((element) {
       addAction(element);
     });
@@ -80,6 +76,10 @@ class SkillComboController extends ChangeNotifier {
 
   void removeAction(SkillAction action) {
     actions.remove(action);
+    notifyListeners();
+  }
+
+  void onChange() {
     notifyListeners();
   }
 
@@ -109,14 +109,70 @@ class SkillDataController extends ChangeNotifier {
   Future<void> init() async {
     for (final element in tabs) {
       element.addListener(() {
-        notifyListeners();
-        CacheManager.save(toJson());
+        // notifyListeners();
+        save();
       });
     }
     notifyListeners();
   }
 
+  void addTab(TabPageController tab) {
+    tabs.add(tab);
+    tab.addListener(() {
+      // notifyListeners();
+      save();
+    });
+    notifyListeners();
+  }
+
+  void removeTab(TabPageController tab) {
+    tabs.remove(tab);
+    save();
+    notifyListeners();
+  }
+
+  void save() {
+    CacheManager.save(toJson());
+  }
+
   factory SkillDataController.fromJson(Map<String, dynamic> json) => _$SkillDataControllerFromJson(json);
 
   Map<String, dynamic> toJson() => _$SkillDataControllerToJson(this);
+}
+
+class ComboActiveManager extends ChangeNotifier {
+  static final ComboActiveManager _instance = ComboActiveManager._();
+
+  factory ComboActiveManager() => _instance;
+
+  ComboActiveManager._();
+
+  bool _isActive = false;
+  TabPageController? _activeController;
+
+  bool get isActive => _isActive;
+
+  TabPageController? get activeController => _activeController;
+
+  void activeSkillCombo() {
+
+  }
+
+  void active(TabPageController controller) {
+    if (_isActive && _activeController != null) {
+      SkillComboService().stopCombo();
+    }
+    _isActive = true;
+    _activeController = controller;
+    final combos = _activeController!.skills.map((e) => _MySkillCombo(e.actions));
+    SkillComboService().startCombo(combos.toList());
+
+    notifyListeners();
+  }
+
+  void disable() {
+    _isActive = false;
+    SkillComboService().stopCombo();
+    notifyListeners();
+  }
 }

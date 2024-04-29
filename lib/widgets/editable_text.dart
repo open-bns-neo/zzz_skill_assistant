@@ -19,11 +19,17 @@ class _EditableTextWidgetState extends State<EditableTextWidget> {
   void initState() {
     super.initState();
     _displayText = widget.text;
+    if (_displayText.isEmpty) {
+      _isEditing = true;
+    }
     _focusNode.addListener(() {
       if (!_focusNode.hasFocus) {
         setState(() {
           _isEditing = false;
           _displayText = _textEditingController.text;
+          if (_displayText.isEmpty) {
+            _displayText = '未命名';
+          }
           widget.onChanged?.call(_displayText);
         });
       }
@@ -59,7 +65,7 @@ class _EditableTextWidgetState extends State<EditableTextWidget> {
           autofocus: true,
           decoration: const InputDecoration(
             border: UnderlineInputBorder(),
-            labelText: '重命名',
+            labelText: '卡刀名字',
           ),
           onFieldSubmitted: (value) {
             setState(() {

@@ -28,6 +28,7 @@ SkillComboController _$SkillComboControllerFromJson(
           ?.map((e) => SkillAction.fromJson(e as Map<String, dynamic>))
           .toList(),
       active: json['active'] as bool? ?? true,
+      lock: json['lock'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$SkillComboControllerToJson(
@@ -36,6 +37,7 @@ Map<String, dynamic> _$SkillComboControllerToJson(
       'name': instance.name,
       'actions': instance.actions,
       'active': instance.active,
+      'lock': instance.lock,
     };
 
 SkillDataController _$SkillDataControllerFromJson(Map<String, dynamic> json) =>

@@ -7,6 +7,7 @@ class KeyImageLoader {
   static const _keyMap = <int, String>{
     mouseLButton : "left-click",
     mouseRButton : "right-click",
+    mouseXButton : "mouse-side",
     VIRTUAL_KEY.VK_0 : "0-key",
     VIRTUAL_KEY.VK_1 : "1-key",
     VIRTUAL_KEY.VK_2 : "2-key",

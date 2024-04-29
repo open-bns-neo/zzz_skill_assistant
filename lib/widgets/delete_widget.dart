@@ -7,6 +7,7 @@ class DeleteWidget extends StatelessWidget {
   final Function? onDelete;
   final Function? onCancel;
   final double? size;
+  final bool enable;
 
   const DeleteWidget({
     super.key,
@@ -15,6 +16,7 @@ class DeleteWidget extends StatelessWidget {
     this.onDelete,
     this.onCancel,
     this.size,
+    this.enable = true,
   });
 
   @override
@@ -25,7 +27,7 @@ class DeleteWidget extends StatelessWidget {
         Icons.delete_forever,
       ),
       color: Theme.of(context).colorScheme.error,
-      onPressed: () async  {
+      onPressed: enable ? () async  {
         if (await confirm(
           context,
           title: Text(title),
@@ -36,7 +38,7 @@ class DeleteWidget extends StatelessWidget {
           onDelete?.call();
         }
         onCancel?.call();
-      },
+      } : null,
     );
   }
 }

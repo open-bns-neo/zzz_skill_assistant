@@ -57,8 +57,9 @@ class SkillComboController extends ChangeNotifier {
   String name;
   final List<SkillAction> actions = [];
   bool active;
+  bool lock;
 
-  SkillComboController({this.name = '', List<SkillAction>? actions, this.active = true}) {
+  SkillComboController({this.name = '', List<SkillAction>? actions, this.active = true, this.lock = false}) {
     actions?.forEach((element) {
       addAction(element);
     });

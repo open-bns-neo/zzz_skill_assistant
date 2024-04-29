@@ -54,10 +54,16 @@ class _CombosPageState extends State<CombosPage> {
                     Expanded(
                       child: ComboWidget(skill),
                     ),
-                    DeleteWidget(
-                      onDelete: () {
-                        tab.removeSkill(skill);
-                      },
+                    Column(
+                      children: [
+                        _buildLockIcon(skill),
+                        if (!skill.lock)
+                          DeleteWidget(
+                            onDelete: () {
+                              tab.removeSkill(skill);
+                            },
+                          ),
+                      ],
                     ),
                   ],
                 ),
@@ -96,6 +102,16 @@ class _CombosPageState extends State<CombosPage> {
           ],
         ),
       ],
+    );
+  }
+
+  Widget _buildLockIcon(SkillComboController skill) {
+    return IconButton(
+      onPressed: () {
+        skill.lock = !skill.lock;
+        setState(() {});
+      },
+      icon: skill.lock ? const Icon(Icons.lock, color: Colors.red, size: 20) : const Icon(Icons.lock_open, size: 20,)
     );
   }
 

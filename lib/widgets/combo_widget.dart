@@ -85,20 +85,15 @@ class _ComboWidgetState extends State<ComboWidget> {
                 for (final action in actions)
                   ...[
                     ActionWidget(
-                      key: ValueKey(action),
                       action,
+                      widget.skill,
+                      key: ValueKey(action),
                       onDeleted: () {
                         widget.skill.removeAction(action);
                       },
                       onChanged: () {
                         widget.skill.onChange();
                       },
-                    ),
-                    Container(
-                      padding: const EdgeInsets.only(left: 10),
-                      width: 4,
-                      height: 40,
-                      color: Colors.redAccent,
                     ),
                     _buildAddActionMenu((newAction) {
                       _addSkillAction(newAction, actions.indexOf(action) + 1);
@@ -117,7 +112,7 @@ class _ComboWidgetState extends State<ComboWidget> {
         builder:
             (BuildContext context, MenuController controller, Widget? child) {
           return IconButton(
-            onPressed: () {
+            onPressed: widget.skill.lock ? null : () {
               if (controller.isOpen) {
                 controller.close();
               } else {

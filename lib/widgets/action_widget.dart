@@ -261,7 +261,6 @@ class _ColorTestActionState extends _ActionWidgetState<ColorTestAction> {
   @override
   void initState() {
     super.initState();
-    ScreenColorPicker.pickColorNotifier.addListener(onColorPicked);
   }
 
   @override

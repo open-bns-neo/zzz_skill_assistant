@@ -17,6 +17,8 @@ dependencies:
   confirm_dialog: ^1.0.3
   prompt_dialog: ^1.0.15
   toastification: ^1.2.1
+  shared_preferences: ^2.2.3
+  get: ^4.6.6
 
 dev_dependencies:
   flutter_test:

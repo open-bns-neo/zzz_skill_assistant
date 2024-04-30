@@ -1,4 +1,5 @@
 import 'package:bns_skill_assistant/controller/skill_data_controller.dart';
+import 'package:bns_skill_assistant/services/skill_combo.dart';
 import 'package:bns_skill_assistant/widgets/delete_widget.dart';
 import 'package:bns_skill_assistant/widgets/util/notification.dart';
 import 'package:flutter/cupertino.dart';
@@ -52,38 +53,45 @@ class _CombosPageState extends State<CombosPage> {
             ],
           ),
         ),
-        ElevatedButton(
-          onPressed: () {
-            tab.addSkill(SkillComboController());
-          },
-          child: const Text('添加卡刀组'),
-        ),
         const SizedBox(height: 10,),
-        Column(
+        Row(
           mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ElevatedButton(
-              style: isActive() ? ButtonStyle(
-                backgroundColor: MaterialStateProperty.all(Theme.of(context).disabledColor),
-              ) : null,
               onPressed: () {
-                if (isActive()) {
-                  _activeManager.disable();
-                  notify.info('已关闭', context);
-                } else {
-                  _activeManager.active(tab);
-                  notify.success('已激活当前页面', context);
-                }
+                tab.addSkill(SkillComboController());
               },
-              child: isActive() ? Text('取消激活', style: TextStyle(color: Theme.of(context).colorScheme.error),) : const Text('激活'),
+              child: const Text('添加卡刀组'),
             ),
-            const SizedBox(width: 5,),
-            const Text(
-              '快捷键: Ctrl + K',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey,
-              ),
+            const SizedBox(width: 10,),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton(
+                  style: isActive() ? ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all(Theme.of(context).disabledColor),
+                  ) : null,
+                  onPressed: () {
+                    if (isActive()) {
+                      _activeManager.disable();
+                      notify.info('已关闭', context);
+                    } else {
+                      _activeManager.active(tab);
+                      notify.success('已激活当前页面', context);
+                    }
+                  },
+                  child: isActive() ? Text('取消激活', style: TextStyle(color: Theme.of(context).colorScheme.error),) : const Text('激活'),
+                ),
+                const SizedBox(width: 5,),
+                const Text(
+                  '快捷键: Ctrl + K',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey,
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -105,8 +113,10 @@ class _CombosPageState extends State<CombosPage> {
               Column(
                 children: [
                   _buildLockIcon(skill),
+                  _buildCopyIcon(skill),
                   if (!skill.lock)
                     DeleteWidget(
+                      size: 18,
                       onDelete: () {
                         widget._controller.removeSkill(skill);
                       },
@@ -127,7 +137,22 @@ class _CombosPageState extends State<CombosPage> {
         skill.lock = !skill.lock;
         setState(() {});
       },
-      icon: skill.lock ? const Icon(Icons.lock, color: Colors.red, size: 20) : const Icon(Icons.lock_open, size: 20,)
+      icon: skill.lock ? const Icon(Icons.lock, color: Colors.red, size: 18) : const Icon(Icons.lock_open, size: 18,)
+    );
+  }
+
+  Widget _buildCopyIcon(SkillComboController skill) {
+    return IconButton(
+      onPressed: () {
+        final newSkill = SkillComboController(
+          name: skill.name,
+          actions: skill.actions.map((e) => e.copy()).toList(),
+          active: skill.active,
+          lock: skill.lock,
+        );
+        widget._controller.addSkill(newSkill);
+      },
+      icon: const Icon(Icons.copy, size: 18,)
     );
   }
 

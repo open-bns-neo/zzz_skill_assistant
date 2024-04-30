@@ -167,7 +167,7 @@ class KeyHookManager {
   static String getForegroundWindowInfo() {
     final now = DateTime.now().millisecondsSinceEpoch;
 
-    if (now - _lastUpdateWindowsInfoTime < 5000) {
+    if (now - _lastUpdateWindowsInfoTime < 1000) {
       return _windowsInfo;
     }
 

@@ -56,6 +56,8 @@ abstract interface class SkillAction {
   }
 
   Map<String, dynamic> toJson();
+
+  SkillAction copy();
 }
 
 @JsonSerializable()
@@ -68,6 +70,7 @@ class WaitForKeyAction implements SkillAction {
 
   @override
   Future<bool> execute(ActionContext context) async {
+    log('WaitForKeyAction execute: ${toJson()}');
     return await KeyHookManager.waitKey(event, timeout: timeout);
   }
 
@@ -75,6 +78,11 @@ class WaitForKeyAction implements SkillAction {
 
   @override
   Map<String, dynamic> toJson() => _$WaitForKeyActionToJson(this);
+
+  @override
+  SkillAction copy() {
+    return WaitForKeyAction(event, timeout: timeout);
+  }
 }
 
 @JsonSerializable()
@@ -87,6 +95,7 @@ class WaitForClickAction implements SkillAction {
 
   @override
   Future<bool> execute(ActionContext context) async {
+    log('WaitForClickAction execute: ${toJson()}');
     final ret = await KeyHookManager.waitKey(KeyEvent(keyCode: event.keyCode, type: EventType.keyDown), timeout: timeout);
     if (!ret) {
       return false;
@@ -99,6 +108,11 @@ class WaitForClickAction implements SkillAction {
 
   @override
   Map<String, dynamic> toJson() => _$WaitForClickActionToJson(this);
+
+  @override
+  SkillAction copy() {
+    return WaitForClickAction(event, timeout: timeout);
+  }
 }
 
 @JsonSerializable()
@@ -111,6 +125,7 @@ class WaitForDoubleClickAction implements SkillAction {
 
   @override
   Future<bool> execute(ActionContext context) async {
+    log('WaitForDoubleClickAction execute: ${toJson()}');
     var ret = await WaitForClickAction(event, timeout: timeout).execute(context);
     if (!ret) {
       return false;
@@ -124,6 +139,11 @@ class WaitForDoubleClickAction implements SkillAction {
 
   @override
   Map<String, dynamic> toJson() => _$WaitForDoubleClickActionToJson(this);
+
+  @override
+  SkillAction copy() {
+    return WaitForDoubleClickAction(event, timeout: timeout);
+  }
 }
 
 @JsonSerializable()
@@ -135,6 +155,7 @@ class PressKeyAction implements SkillAction {
 
   @override
   Future<bool> execute(ActionContext context) async {
+    log('PressKeyAction execute: ${toJson()}');
     final downEvent = KeyEvent(keyCode: event.keyCode, type: EventType.keyDown);
     final upEvent = KeyEvent(keyCode: event.keyCode, type: EventType.keyUp);
     KeyHookManager.sendInput(downEvent);
@@ -147,6 +168,11 @@ class PressKeyAction implements SkillAction {
 
   @override
   Map<String, dynamic> toJson() => _$PressKeyActionToJson(this);
+
+  @override
+  SkillAction copy() {
+    return PressKeyAction(event);
+  }
 }
 
 @JsonSerializable()
@@ -158,6 +184,7 @@ class WaitAction implements SkillAction {
 
   @override
   Future<bool> execute(ActionContext context) async {
+    log('WaitAction execute: ${toJson()}');
     await Future.delayed(Duration(milliseconds: duration));
     return true;
   }
@@ -166,6 +193,11 @@ class WaitAction implements SkillAction {
 
   @override
   Map<String, dynamic> toJson() => _$WaitActionToJson(this);
+
+  @override
+  SkillAction copy() {
+    return WaitAction(duration);
+  }
 }
 
 @JsonSerializable()
@@ -177,6 +209,7 @@ class ScreenColorPickerAction implements SkillAction {
 
   @override
   Future<bool> execute(ActionContext context) async {
+    log('ScreenColorPickerAction execute: ${toJson()}');
     color = await ScreenColorPicker.pickColorAsync();
     log('鼠标位置: (${color?.x}, ${color?.y})');
     log('颜色: ${color?.color} #${color?.color.toRadixString(16).padLeft(6, '0').toUpperCase()}');
@@ -187,6 +220,11 @@ class ScreenColorPickerAction implements SkillAction {
 
   @override
   Map<String, dynamic> toJson() => _$ScreenColorPickerActionToJson(this);
+
+  @override
+  SkillAction copy() {
+    return ScreenColorPickerAction();
+  }
 }
 
 @JsonSerializable()
@@ -198,6 +236,7 @@ class WaitComposeKeyAction implements SkillAction {
 
   @override
   Future<bool> execute(ActionContext context) async {
+    // log('WaitComposeKeyAction execute: ${toJson()}');
     for (final event in events) {
       final ret = await KeyHookManager.nextKey(timeout: 1000);
       if (ret?.keyCode != event || ret?.type != EventType.keyDown) {
@@ -211,6 +250,11 @@ class WaitComposeKeyAction implements SkillAction {
 
   @override
   Map<String, dynamic> toJson() => _$WaitComposeKeyActionToJson(this);
+
+  @override
+  SkillAction copy() {
+    return WaitComposeKeyAction(events);
+  }
 }
 
 @JsonSerializable()
@@ -222,6 +266,7 @@ class ColorTestAction implements SkillAction {
 
   @override
   Future<bool> execute(ActionContext context) async {
+    log('ColorTestAction execute: ${toJson()}');
     final hdcScreen = GetDC(NULL);
     final pix = GetPixel(hdcScreen, pixel.x, pixel.y);
     // log('ColorTestAction 颜色: $pix ${pixel.color}');
@@ -232,6 +277,11 @@ class ColorTestAction implements SkillAction {
 
   @override
   Map<String, dynamic> toJson() => _$ColorTestActionToJson(this);
+
+  @override
+  SkillAction copy() {
+    return ColorTestAction(pixel);
+  }
 }
 
 class CustomAction implements SkillAction {
@@ -248,25 +298,36 @@ class CustomAction implements SkillAction {
   Map<String, dynamic> toJson() {
     return {};
   }
+
+  @override
+  SkillAction copy() {
+    return CustomAction(action);
+  }
 }
 
 abstract class SkillCombo {
   List<SkillAction> getActions();
 
-  Future<void> start() async {
+  Future<void> start({
+    bool onlyActiveOnSpecificPrograms = false,
+    List<String> specificPrograms = const [],
+  }) async {
     active = true;
     while (active) {
-      await Future.delayed(const Duration(milliseconds: 1));
-
-      final runningProgram = KeyHookManager.getForegroundWindowInfo();
-      if (!runningProgram.contains('bns')) {
-        continue;
-      }
-
       final actions = getActions();
       if (actions.isEmpty) {
         return;
       }
+
+      await Future.delayed(const Duration(milliseconds: 1));
+
+      if (onlyActiveOnSpecificPrograms) {
+        final runningProgram = KeyHookManager.getForegroundWindowInfo();
+        if (!specificPrograms.any((element) => runningProgram.contains(element))) {
+          continue;
+        }
+      }
+
       for (final action in getActions()) {
         if (!active) {
           break;

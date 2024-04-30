@@ -1,6 +1,9 @@
 import 'package:bns_skill_assistant/controller/skill_data_controller.dart';
 import 'package:bns_skill_assistant/services/skill_combo.dart';
+import 'package:get/get.dart';
 import 'package:win32/win32.dart';
+
+import '../controller/setting_controller.dart';
 
 class SkillComboService {
   SkillComboService._privateConstructor();
@@ -48,8 +51,13 @@ class SkillComboService {
 
     _runningCombos = combos;
 
+    final settings = Get.find<SettingController>();
+
     for (var combo in _runningCombos) {
-      combo.start();
+      combo.start(
+        onlyActiveOnSpecificPrograms: settings.onlyActiveOnSpecificPrograms.value,
+        specificPrograms: settings.activePrograms,
+      );
     }
   }
 

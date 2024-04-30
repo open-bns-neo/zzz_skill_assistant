@@ -23,7 +23,7 @@ class _ComboWidgetState extends State<ComboWidget> {
   Widget build(BuildContext context) {
     final skill = widget.skill;
     return Container(
-      height: 100,
+      height: 120,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         color: skill.active ? Theme.of(context).primaryColorLight : Theme.of(context).disabledColor,
@@ -143,7 +143,7 @@ class _ComboWidgetState extends State<ComboWidget> {
     SkillAction? action;
     switch (actionType) {
       case const (WaitAction):
-        action = WaitAction(0);
+        action = WaitAction(10);
         break;
       case const (WaitForKeyAction):
         action = WaitForKeyAction($key.KeyEvent());

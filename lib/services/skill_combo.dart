@@ -81,7 +81,7 @@ class WaitForKeyAction implements SkillAction {
 
   @override
   SkillAction copy() {
-    return WaitForKeyAction(event, timeout: timeout);
+    return WaitForKeyAction(KeyEvent(keyCode: event.keyCode, type: event.type), timeout: timeout);
   }
 }
 
@@ -111,7 +111,7 @@ class WaitForClickAction implements SkillAction {
 
   @override
   SkillAction copy() {
-    return WaitForClickAction(event, timeout: timeout);
+    return WaitForClickAction(KeyEvent(keyCode: event.keyCode, type: event.type), timeout: timeout);
   }
 }
 
@@ -142,7 +142,7 @@ class WaitForDoubleClickAction implements SkillAction {
 
   @override
   SkillAction copy() {
-    return WaitForDoubleClickAction(event, timeout: timeout);
+    return WaitForDoubleClickAction(KeyEvent(keyCode: event.keyCode, type: event.type), timeout: timeout);
   }
 }
 
@@ -171,7 +171,7 @@ class PressKeyAction implements SkillAction {
 
   @override
   SkillAction copy() {
-    return PressKeyAction(event);
+    return PressKeyAction(KeyEvent(keyCode: event.keyCode, type: event.type));
   }
 }
 

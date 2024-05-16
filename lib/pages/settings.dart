@@ -1,6 +1,5 @@
 import 'package:bns_skill_assistant/controller/setting_controller.dart';
 import 'package:bns_skill_assistant/widgets/util/notification.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

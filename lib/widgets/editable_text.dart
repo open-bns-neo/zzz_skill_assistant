@@ -65,7 +65,6 @@ class _EditableTextWidgetState extends State<EditableTextWidget> {
           autofocus: true,
           decoration: const InputDecoration(
             border: UnderlineInputBorder(),
-            labelText: '卡刀名字',
           ),
           onFieldSubmitted: (value) {
             setState(() {

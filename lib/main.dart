@@ -1,11 +1,9 @@
-import 'dart:developer';
-
+import 'package:bns_skill_assistant/controller/color_library_controller.dart';
 import 'package:bns_skill_assistant/controller/setting_controller.dart';
 import 'package:bns_skill_assistant/services/key_hook_manager.dart';
 import 'package:bns_skill_assistant/services/skill_combo_service.dart';
 import 'package:get/get.dart';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'pages/home.dart';
@@ -23,6 +21,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Get.put(SettingController());
+    Get.put(ColorLibraryController());
     return GetMaterialApp(
       title: '剑灵助手',
       theme: ThemeData(

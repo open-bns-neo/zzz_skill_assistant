@@ -5,21 +5,18 @@ import 'package:bns_skill_assistant/services/skill_combo.dart';
 import 'package:bns_skill_assistant/widgets/delete_widget.dart';
 import 'package:bns_skill_assistant/widgets/util/key_image_loader.dart';
 import 'package:bns_skill_assistant/widgets/util/notification.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
-import '../controller/skill_data_controller.dart';
 import '../services/key_event.dart' as $key;
 import '../tools/screen_color_picker.dart';
 
 class ActionWidget extends StatefulWidget {
   final SkillAction action;
-  final SkillComboController controller;
+  final bool lock;
   final Function()? onDeleted;
   final Function()? onChanged;
 
-  const ActionWidget(this.action, this.controller, {super.key, this.onDeleted, this.onChanged});
+  const ActionWidget(this.action, this.lock, {super.key, this.onDeleted, this.onChanged});
 
   @override
   State createState() {
@@ -102,7 +99,7 @@ class _ActionWidgetState<T extends SkillAction> extends State<ActionWidget> {
                       size: 15,
                     ),
                     tooltip: "编辑",
-                    onPressed: widget.controller.lock ? null : () {
+                    onPressed: widget.lock ? null : () {
                       setState(() {
                         onEdit();
                         _isEditing = true;;
@@ -112,7 +109,7 @@ class _ActionWidgetState<T extends SkillAction> extends State<ActionWidget> {
                 ),
                 DeleteWidget(
                   size: 15,
-                  enable: !widget.controller.lock,
+                  enable: !widget.lock,
                   onDelete: () {
                     setState(() {
                       widget.onDeleted?.call();

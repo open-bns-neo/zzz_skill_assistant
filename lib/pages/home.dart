@@ -5,6 +5,7 @@ import 'package:bns_skill_assistant/pages/settings.dart';
 import 'package:bns_skill_assistant/services/key_hook_manager.dart';
 import 'package:bns_skill_assistant/services/skill_combo_service.dart';
 import 'package:bns_skill_assistant/widgets/delete_widget.dart';
+import 'package:bns_skill_assistant/widgets/slide_route.dart';
 import 'package:get/get.dart';
 import 'package:prompt_dialog/prompt_dialog.dart';
 
@@ -16,6 +17,7 @@ import 'package:toastification/toastification.dart';
 import '../controller/cache_manager.dart';
 import '../widgets/combos_page.dart';
 import '../widgets/util/notification.dart';
+import 'color_library.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
@@ -103,9 +105,17 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
           IconButton(
             icon: const Icon(Icons.settings),
             onPressed: () {
-              Get.to(
-                () => const SettingsPage(),
+              showSlideRouteDialog(
+                context: context,
+                  slideTransitionFrom: SlideTransitionFrom.right,
+                builder: (context, padding) {
+                  return const ColorLibraryPage();
+                },
               );
+              // Get.to(
+              //   () => const SettingsPage(),
+              //   transition: Transition.rightToLeft,
+              // );
             },
           ),
         ],

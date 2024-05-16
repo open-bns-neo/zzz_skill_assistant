@@ -86,7 +86,7 @@ class _ComboWidgetState extends State<ComboWidget> {
                   ...[
                     ActionWidget(
                       action,
-                      widget.skill,
+                      widget.skill.lock,
                       key: ValueKey(action),
                       onDeleted: () {
                         widget.skill.removeAction(action);

@@ -6,11 +6,13 @@ import 'package:get/get.dart';
 import '../tools/screen_color_picker.dart';
 import '../widgets/delete_widget.dart';
 import '../widgets/editable_text.dart';
+import '../widgets/hover_animated_container.dart';
 import '../widgets/util/notification.dart';
 
-
 class ColorLibraryPage extends GetView<ColorLibraryController> {
-  const ColorLibraryPage({super.key});
+  final Function(ColorData)? onSelect;
+
+  const ColorLibraryPage({super.key, this.onSelect});
 
   @override
   Widget build(BuildContext context) {
@@ -29,9 +31,12 @@ class ColorLibraryPage extends GetView<ColorLibraryController> {
                   height: 20,
                 ),
                 Expanded(
-                  child: ListView.separated(
-                    separatorBuilder: (context, index) => const SizedBox(
-                      height: 10,
+                  child: GridView.builder(
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                       crossAxisCount: 2,
+                       mainAxisSpacing: 10,
+                       crossAxisSpacing: 10,
+                       childAspectRatio: 4,
                     ),
                     itemCount: controller.colors.length,
                     itemBuilder: (context, index) {
@@ -39,6 +44,7 @@ class ColorLibraryPage extends GetView<ColorLibraryController> {
                       return ColorItem(
                         key: ValueKey(color),
                         data: color,
+                        onSelect: onSelect,
                       );
                     },
                   ),
@@ -62,9 +68,10 @@ class ColorLibraryPage extends GetView<ColorLibraryController> {
 }
 
 class ColorItem extends StatelessWidget {
+  final Function(ColorData)? onSelect;
   final ColorData data;
 
-  const ColorItem({super.key, required this.data});
+  const ColorItem({super.key, required this.data, this.onSelect});
 
   @override
   Widget build(BuildContext context) {
@@ -72,34 +79,53 @@ class ColorItem extends StatelessWidget {
   }
 
   Widget _buildColorItem(BuildContext context) {
+
+
     return Obx(
-      () => Container(
-        height: 100,
-        padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          color: Theme.of(context).primaryColorLight,
-        ),
-        child: Row(
-          children: [
-            SizedBox(
-              width: 150,
-              child: EditableTextWidget(
-                data.name.value,
-                onChanged: (value) {
-                  data.name.value = value;
-                },
+      () {
+        Widget child = Container(
+          height: 100,
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            color: Theme.of(context).primaryColorLight,
+          ),
+          child: Row(
+            children: [
+              SizedBox(
+                width: 150,
+                child: EditableTextWidget(
+                  canEdit: onSelect == null,
+                  data.name.value,
+                  onChanged: (value) {
+                    data.name.value = value;
+                  },
+                ),
               ),
+              const SizedBox(
+                width: 20,
+              ),
+              _buildColorBody(),
+              const Spacer(),
+              if (onSelect == null)
+                _buildEditButton(context),
+            ],
+          ),
+        );
+
+        if (onSelect != null) {
+          child = HoverAnimatedContainer(
+            child: GestureDetector(
+              child: child,
+              onTap: () {
+                onSelect?.call(data);
+                Navigator.of(context).pop();
+              },
             ),
-            const SizedBox(
-              width: 20,
-            ),
-            _buildColorBody(),
-            const Spacer(),
-            _buildEditButton(context),
-          ],
-        ),
-      ),
+          );
+        }
+        return child;
+      },
     );
   }
 

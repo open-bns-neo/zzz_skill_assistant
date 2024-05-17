@@ -105,17 +105,10 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
           IconButton(
             icon: const Icon(Icons.settings),
             onPressed: () {
-              showSlideRouteDialog(
-                context: context,
-                  slideTransitionFrom: SlideTransitionFrom.right,
-                builder: (context, padding) {
-                  return const ColorLibraryPage();
-                },
+              Get.to(
+                () => const SettingsPage(),
+                transition: Transition.rightToLeft,
               );
-              // Get.to(
-              //   () => const SettingsPage(),
-              //   transition: Transition.rightToLeft,
-              // );
             },
           ),
         ],

@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 class EditableTextWidget extends StatefulWidget {
   final Function(String)? onChanged;
   final String text;
-  const EditableTextWidget(this.text, {super.key, this.onChanged});
+  final bool canEdit;
+  const EditableTextWidget(this.text, {super.key, this.onChanged, this.canEdit = true});
 
   @override
   State createState() => _EditableTextWidgetState();
@@ -47,6 +48,10 @@ class _EditableTextWidgetState extends State<EditableTextWidget> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onDoubleTap: () {
+        if (!widget.canEdit) {
+          return;
+        }
+
         setState(() {
           _isEditing = true;
           _textEditingController.text = _displayText; // 显示之前的文本

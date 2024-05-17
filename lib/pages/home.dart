@@ -103,6 +103,12 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             },
           ),
           IconButton(
+            icon: const Icon(Icons.color_lens_outlined),
+            onPressed: () {
+              ColorLibraryPage.show(context);
+            },
+          ),
+          IconButton(
             icon: const Icon(Icons.settings),
             onPressed: () {
               Get.to(

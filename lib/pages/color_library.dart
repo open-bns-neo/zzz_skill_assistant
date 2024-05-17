@@ -7,12 +7,23 @@ import '../tools/screen_color_picker.dart';
 import '../widgets/delete_widget.dart';
 import '../widgets/editable_text.dart';
 import '../widgets/hover_animated_container.dart';
+import '../widgets/slide_route.dart';
 import '../widgets/util/notification.dart';
 
 class ColorLibraryPage extends GetView<ColorLibraryController> {
-  final Function(ColorData)? onSelect;
+  final Function(ColorData?)? onSelect;
 
   const ColorLibraryPage({super.key, this.onSelect});
+
+  static void show(BuildContext context, {Function(ColorData?)? onSelect}) {
+    showSlideRouteDialog(
+      context: context,
+      slideTransitionFrom: SlideTransitionFrom.right,
+      builder: (context, padding) {
+        return ColorLibraryPage(onSelect: onSelect,);
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -67,22 +78,32 @@ class ColorLibraryPage extends GetView<ColorLibraryController> {
   }
 }
 
-class ColorItem extends StatelessWidget {
-  final Function(ColorData)? onSelect;
+class ColorItem extends StatefulWidget {
+  final Function(ColorData?)? onSelect;
   final ColorData data;
 
   const ColorItem({super.key, required this.data, this.onSelect});
 
   @override
+  State<StatefulWidget> createState() => _ColorItemState();
+
+}
+
+class _ColorItemState extends State<ColorItem> {
+  @override
   Widget build(BuildContext context) {
     return _buildColorItem(context);
   }
 
+  @override
+  void dispose() {
+    super.dispose();
+    Get.find<ColorLibraryController>().save();
+  }
+
   Widget _buildColorItem(BuildContext context) {
-
-
     return Obx(
-      () {
+          () {
         Widget child = Container(
           height: 100,
           padding: const EdgeInsets.all(10),
@@ -95,10 +116,10 @@ class ColorItem extends StatelessWidget {
               SizedBox(
                 width: 150,
                 child: EditableTextWidget(
-                  canEdit: onSelect == null,
-                  data.name.value,
+                  canEdit: widget.onSelect == null,
+                  widget.data.name.value,
                   onChanged: (value) {
-                    data.name.value = value;
+                    widget.data.name.value = value;
                   },
                 ),
               ),
@@ -107,18 +128,18 @@ class ColorItem extends StatelessWidget {
               ),
               _buildColorBody(),
               const Spacer(),
-              if (onSelect == null)
+              if (widget.onSelect == null)
                 _buildEditButton(context),
             ],
           ),
         );
 
-        if (onSelect != null) {
+        if (widget.onSelect != null) {
           child = HoverAnimatedContainer(
             child: GestureDetector(
               child: child,
               onTap: () {
-                onSelect?.call(data);
+                widget.onSelect?.call(widget.data);
                 Navigator.of(context).pop();
               },
             ),
@@ -130,18 +151,18 @@ class ColorItem extends StatelessWidget {
   }
 
   Widget _buildColorBody() {
-    final r = data.pixel.value.color & 0xFF;
-    final g = (data.pixel.value.color >> 8) & 0xFF;
-    final b = (data.pixel.value.color >> 16) & 0xFF;
+    final r = widget.data.pixel.value.color & 0xFF;
+    final g = (widget.data.pixel.value.color >> 8) & 0xFF;
+    final b = (widget.data.pixel.value.color >> 16) & 0xFF;
 
-    return data.isEditing.value ? const Row(
+    return widget.data.isEditing.value ? const Row(
       children: [
         Icon(Icons.color_lens),
         Text("取色中..."),
       ],
     ) : Row(
       children: [
-        Text("取色 x: ${data.pixel.value.x} y: ${data.pixel.value.y}"),
+        Text("取色 x: ${widget.data.pixel.value.x} y: ${widget.data.pixel.value.y}"),
         const SizedBox(width: 5,),
         Container(
           decoration: BoxDecoration(
@@ -157,11 +178,11 @@ class ColorItem extends StatelessWidget {
   }
 
   Widget _buildEditButton(BuildContext context) {
-    return data.isEditing.value ?
+    return widget.data.isEditing.value ?
     IconButton(
       icon: const Icon(Icons.save),
       onPressed: () {
-        data.isEditing.value = false;
+        widget.data.isEditing.value = false;
         _save();
       },
       tooltip: "保存",
@@ -176,14 +197,14 @@ class ColorItem extends StatelessWidget {
           ),
           tooltip: "编辑",
           onPressed: () {
-            data.isEditing.value = true;
+            widget.data.isEditing.value = true;
             _edit(context);
           },
         ),
         DeleteWidget(
           size: 15,
           onDelete: () {
-            Get.find<ColorLibraryController>().removeData(data);
+            Get.find<ColorLibraryController>().removeData(widget.data);
           },
         ),
       ],
@@ -193,7 +214,7 @@ class ColorItem extends StatelessWidget {
   void _onColorPicked() {
     final color = ScreenColorPicker.pickColorNotifier.value;
     if (color != null) {
-      data.pixel.value = color;
+      widget.data.pixel.value = color;
       _save();
     }
   }
@@ -204,7 +225,7 @@ class ColorItem extends StatelessWidget {
   }
 
   void _save() {
-    data.isEditing.value = false;
+    widget.data.isEditing.value = false;
+    ScreenColorPicker.pickColorNotifier.removeListener(_onColorPicked);
   }
-
 }

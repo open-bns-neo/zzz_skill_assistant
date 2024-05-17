@@ -7,6 +7,7 @@ import 'package:bns_skill_assistant/widgets/util/key_image_loader.dart';
 import 'package:bns_skill_assistant/widgets/util/notification.dart';
 import 'package:flutter/material.dart';
 
+import '../pages/color_library.dart';
 import '../services/key_event.dart' as $key;
 import '../tools/screen_color_picker.dart';
 
@@ -311,10 +312,21 @@ class _ColorTestActionState extends _ActionWidgetState<ColorTestAction> {
 
   @override
   Widget buildEditing(BuildContext context) {
-    return const Row(
+    return Row(
       children: [
-        Icon(Icons.color_lens),
-        Text("取色中..."),
+        IconButton(
+          icon: const Icon(Icons.color_lens),
+          onPressed: () {
+            ColorLibraryPage.show(context, onSelect: (data) {
+              if (data != null) {
+                action.pixel = data.pixel.value;
+                save();
+              }
+            });
+          },
+          tooltip: "从取色库进行取色",
+        ),
+        const Text("取色中..."),
       ],
     );
   }

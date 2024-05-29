@@ -1,12 +1,11 @@
 import 'dart:async';
-import 'dart:developer';
 import 'dart:ffi';
-import 'dart:io';
 import 'dart:isolate';
 
 import 'package:ffi/ffi.dart';
 import 'package:win32/win32.dart';
 
+import '../tools/logger.dart';
 import 'key_event.dart';
 
 typedef KeyListener = bool Function(KeyEvent event);
@@ -29,7 +28,7 @@ int lowlevelKeyboardHookProc(int code, int wParam, int lParam) {
 }
 
 int lowlevelMouseHookProc(int code, int wParam, int lParam) {
-  // log('lowlevelMouseHookProc wParam: $wParam');
+  // logger.info('lowlevelMouseHookProc wParam: $wParam');
   if (code == HC_ACTION) {
     // Windows controls this memory; don't deallocate it.
     final kbs = Pointer<MSLLHOOKSTRUCT>.fromAddress(lParam);
@@ -135,7 +134,7 @@ void isolateEntry(SendPort sendPort) async {
     }
     final cost = DateTime.now().millisecondsSinceEpoch - start;
     if (cost > 10) {
-      log('cost: $cost');
+      logger.info('cost: $cost');
     }
     calloc.free(msg);
     await Future.delayed(const Duration(microseconds: 100));
@@ -151,7 +150,7 @@ class KeyHookManager {
   }
 
   static void onKeyEvent(KeyEvent event) {
-    // log('onKeyEvent: $event');
+    // logger.info('onKeyEvent: $event');
     final needRemoveListeners = <KeyListener>[];
     for (final listener in _listeners) {
       if (listener(event)) {

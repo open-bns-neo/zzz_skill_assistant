@@ -4,7 +4,8 @@ class EditableTextWidget extends StatefulWidget {
   final Function(String)? onChanged;
   final String text;
   final bool canEdit;
-  const EditableTextWidget(this.text, {super.key, this.onChanged, this.canEdit = true});
+  final TextInputType? keyboardType;
+  const EditableTextWidget(this.text, {super.key, this.onChanged, this.canEdit = true, this.keyboardType});
 
   @override
   State createState() => _EditableTextWidgetState();
@@ -68,6 +69,7 @@ class _EditableTextWidgetState extends State<EditableTextWidget> {
           focusNode: _focusNode,
           controller: _textEditingController,
           autofocus: true,
+          keyboardType: widget.keyboardType,
           decoration: const InputDecoration(
             border: UnderlineInputBorder(),
           ),

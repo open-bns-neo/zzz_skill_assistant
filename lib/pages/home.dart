@@ -1,20 +1,14 @@
-import 'dart:developer';
-
 import 'package:bns_skill_assistant/controller/skill_data_controller.dart';
 import 'package:bns_skill_assistant/pages/settings.dart';
-import 'package:bns_skill_assistant/services/key_hook_manager.dart';
-import 'package:bns_skill_assistant/services/skill_combo_service.dart';
 import 'package:bns_skill_assistant/widgets/delete_widget.dart';
-import 'package:bns_skill_assistant/widgets/slide_route.dart';
 import 'package:get/get.dart';
 import 'package:prompt_dialog/prompt_dialog.dart';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:toastification/toastification.dart';
 
 import '../controller/cache_manager.dart';
+import '../tools/logger.dart';
 import '../widgets/combos_page.dart';
 import '../widgets/util/notification.dart';
 import 'color_library.dart';
@@ -49,7 +43,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       }
     } catch (e) {
       _controller = SkillDataController();
-      log('Load cache error: $e');
+      logger.error('Load cache error: $e');
     }
 
     _initTabController();

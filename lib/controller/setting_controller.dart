@@ -4,9 +4,11 @@ import 'package:get/get.dart';
 class SettingController extends GetxController {
   static const keyOnlyActiveOnSpecificPrograms = 'onlyActiveOnSpecificPrograms';
   static const keyActivePrograms = 'onlyActiveOnSpecificPrograms';
+  static const keyClickDelay = 'clickDelay';
 
   final onlyActiveOnSpecificPrograms = false.obs;
   final activePrograms = <String>['bns'].obs;
+  final clickDelay = 50.obs;
 
   @override
   void onInit() {
@@ -20,6 +22,7 @@ class SettingController extends GetxController {
 
     onlyActiveOnSpecificPrograms.value = onlyActiveOnSpecificProgramsValue;
     activePrograms.value = activeProgramsValue;
+    clickDelay.value = await CacheManager.get<int>(keyClickDelay) ?? 50;
   }
 
   void setOnlyActiveOnSpecificPrograms(bool value) {
@@ -30,5 +33,10 @@ class SettingController extends GetxController {
   void setActivePrograms(List<String> value) {
     activePrograms.value = value;
     CacheManager.set(keyActivePrograms, value);
+  }
+
+  void setClickDelay(int value) {
+    clickDelay.value = value;
+    CacheManager.set(keyClickDelay, value);
   }
 }

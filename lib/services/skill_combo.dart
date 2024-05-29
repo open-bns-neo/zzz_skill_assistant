@@ -1,11 +1,14 @@
 import 'dart:async';
-import 'dart:developer';
 
 import 'package:bns_skill_assistant/services/key_event.dart';
 import 'package:bns_skill_assistant/services/key_hook_manager.dart';
 import 'package:bns_skill_assistant/tools/screen_color_picker.dart';
+import 'package:get/get.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:win32/win32.dart';
+
+import '../controller/setting_controller.dart';
+import '../tools/logger.dart';
 
 part 'skill_combo.g.dart';
 
@@ -70,7 +73,7 @@ class WaitForKeyAction implements SkillAction {
 
   @override
   Future<bool> execute(ActionContext context) async {
-    log('WaitForKeyAction execute: ${toJson()}');
+    logger.info('WaitForKeyAction execute: ${toJson()}');
     return await KeyHookManager.waitKey(event, timeout: timeout);
   }
 
@@ -95,7 +98,7 @@ class WaitForClickAction implements SkillAction {
 
   @override
   Future<bool> execute(ActionContext context) async {
-    log('WaitForClickAction execute: ${toJson()}');
+    logger.info('WaitForClickAction execute: ${toJson()}');
     final ret = await KeyHookManager.waitKey(KeyEvent(keyCode: event.keyCode, type: EventType.keyDown), timeout: timeout);
     if (!ret) {
       return false;
@@ -125,7 +128,7 @@ class WaitForDoubleClickAction implements SkillAction {
 
   @override
   Future<bool> execute(ActionContext context) async {
-    log('WaitForDoubleClickAction execute: ${toJson()}');
+    logger.info('WaitForDoubleClickAction execute: ${toJson()}');
     var ret = await WaitForClickAction(event, timeout: timeout).execute(context);
     if (!ret) {
       return false;
@@ -155,11 +158,12 @@ class PressKeyAction implements SkillAction {
 
   @override
   Future<bool> execute(ActionContext context) async {
-    log('PressKeyAction execute: ${toJson()}');
+    logger.info('PressKeyAction execute: ${toJson()}');
     final downEvent = KeyEvent(keyCode: event.keyCode, type: EventType.keyDown);
     final upEvent = KeyEvent(keyCode: event.keyCode, type: EventType.keyUp);
     KeyHookManager.sendInput(downEvent);
-    await Future.delayed(const Duration(milliseconds: 16));
+    final settingController = Get.find<SettingController>();
+    await Future.delayed(Duration(milliseconds: settingController.clickDelay.value));
     KeyHookManager.sendInput(upEvent);
     return true;
   }
@@ -184,7 +188,7 @@ class WaitAction implements SkillAction {
 
   @override
   Future<bool> execute(ActionContext context) async {
-    log('WaitAction execute: ${toJson()}');
+    logger.info('WaitAction execute: ${toJson()}');
     await Future.delayed(Duration(milliseconds: duration));
     return true;
   }
@@ -209,10 +213,10 @@ class ScreenColorPickerAction implements SkillAction {
 
   @override
   Future<bool> execute(ActionContext context) async {
-    log('ScreenColorPickerAction execute: ${toJson()}');
+    logger.info('ScreenColorPickerAction execute: ${toJson()}');
     color = await ScreenColorPicker.pickColorAsync();
-    log('鼠标位置: (${color?.x}, ${color?.y})');
-    log('颜色: ${color?.color} #${color?.color.toRadixString(16).padLeft(6, '0').toUpperCase()}');
+    logger.info('鼠标位置: (${color?.x}, ${color?.y})');
+    logger.info('颜色: ${color?.color} #${color?.color.toRadixString(16).padLeft(6, '0').toUpperCase()}');
     return color != null;
   }
 
@@ -236,7 +240,7 @@ class WaitComposeKeyAction implements SkillAction {
 
   @override
   Future<bool> execute(ActionContext context) async {
-    // log('WaitComposeKeyAction execute: ${toJson()}');
+    // logger.info('WaitComposeKeyAction execute: ${toJson()}');
     for (final event in events) {
       final ret = await KeyHookManager.nextKey(timeout: 1000);
       if (ret?.keyCode != event || ret?.type != EventType.keyDown) {
@@ -269,10 +273,10 @@ class ColorTestAction implements SkillAction {
 
   @override
   Future<bool> execute(ActionContext context) async {
-    log('ColorTestAction execute: ${toJson()}');
+    logger.info('ColorTestAction execute: ${toJson()}');
     final hdcScreen = GetDC(NULL);
     final pix = GetPixel(hdcScreen, pixel.x, pixel.y);
-    // log('ColorTestAction 颜色: $pix ${pixel.color}');
+    // logger.info('ColorTestAction 颜色: $pix ${pixel.color}');
     ReleaseDC(NULL, hdcScreen);
     return inverse ? pix != pixel.color : pix == pixel.color;
   }
@@ -343,7 +347,7 @@ abstract class SkillCombo {
             break;
           }
         } catch (e) {
-          log('Action error: $e');
+          logger.info('Action error: $e');
           break;
         }
       }

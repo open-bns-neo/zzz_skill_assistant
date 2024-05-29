@@ -138,7 +138,7 @@ void isolateEntry(SendPort sendPort) async {
       log('cost: $cost');
     }
     calloc.free(msg);
-    await Future.delayed(const Duration(milliseconds: 1));
+    await Future.delayed(const Duration(microseconds: 100));
     return true;
   });
 }

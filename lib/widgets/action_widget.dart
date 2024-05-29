@@ -295,7 +295,14 @@ class _ColorTestActionState extends _ActionWidgetState<ColorTestAction> {
     final b = (action.pixel.color >> 16) & 0xFF;
     return Row(
       children: [
-        Text("取色 x: ${action.pixel.x} y: ${action.pixel.y}"),
+        Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text("取色 x: ${action.pixel.x} y: ${action.pixel.y}"),
+            if (action.inverse)
+              const Text("[反选中]"),
+          ],
+        ),
         const SizedBox(width: 5,),
         Container(
           decoration: BoxDecoration(
@@ -326,7 +333,26 @@ class _ColorTestActionState extends _ActionWidgetState<ColorTestAction> {
           },
           tooltip: "从取色库进行取色",
         ),
-        const Text("取色中..."),
+        Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text("取色中..."),
+            Row(
+              children: [
+                const Text("是否反选"),
+                Checkbox(
+                  value: action.inverse,
+                  onChanged: (value) {
+                    setState(() {
+                      action.inverse = value ?? false;
+                    });
+                  },
+                ),
+              ],
+            ),
+          ],
+        ),
+
       ],
     );
   }

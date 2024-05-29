@@ -262,7 +262,10 @@ class ColorTestAction implements SkillAction {
   @JsonKey(includeToJson: true, includeFromJson: true)
   final type = ActionType.colorTest;
   Pixel pixel;
-  ColorTestAction(this.pixel);
+
+  bool inverse = false;
+
+  ColorTestAction(this.pixel, {this.inverse = false});
 
   @override
   Future<bool> execute(ActionContext context) async {
@@ -270,7 +273,8 @@ class ColorTestAction implements SkillAction {
     final hdcScreen = GetDC(NULL);
     final pix = GetPixel(hdcScreen, pixel.x, pixel.y);
     // log('ColorTestAction 颜色: $pix ${pixel.color}');
-    return pix == pixel.color;
+    ReleaseDC(NULL, hdcScreen);
+    return inverse ? pix != pixel.color : pix == pixel.color;
   }
 
   factory ColorTestAction.fromJson(Map<String, dynamic> json) => _$ColorTestActionFromJson(json);

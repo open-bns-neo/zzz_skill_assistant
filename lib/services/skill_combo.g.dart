@@ -109,10 +109,12 @@ Map<String, dynamic> _$WaitComposeKeyActionToJson(
 ColorTestAction _$ColorTestActionFromJson(Map<String, dynamic> json) =>
     ColorTestAction(
       Pixel.fromJson(json['pixel'] as Map<String, dynamic>),
+      inverse: json['inverse'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$ColorTestActionToJson(ColorTestAction instance) =>
     <String, dynamic>{
       'type': _$ActionTypeEnumMap[instance.type]!,
       'pixel': instance.pixel,
+      'inverse': instance.inverse,
     };

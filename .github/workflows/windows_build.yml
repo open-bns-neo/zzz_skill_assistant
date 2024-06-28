@@ -1,9 +1,8 @@
 name: Build and Release Flutter Windows App
 
 on:
-  push:
-    tags:
-      - 'v*.*.*'  # 仅在推送标签时触发，例如 v1.0.0
+  release:
+    types: [published]
 
 jobs:
   build:
@@ -29,21 +28,10 @@ jobs:
         mkdir release
         Compress-Archive -Path build/windows/x64/runner/Release/* -DestinationPath release/app.zip
 
-    - name: Create GitHub Release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
-        draft: false
-        prerelease: false
-
     - name: Upload release asset
       uses: actions/upload-release-asset@v1
       with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        upload_url: ${{ github.event.release.upload_url }}
         asset_path: release/app.zip
         asset_name: app.zip
         asset_content_type: application/zip

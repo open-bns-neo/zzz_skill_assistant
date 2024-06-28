@@ -20,4 +20,32 @@
 
 市面上有很多卡刀软件，但是大多数都是收费的，而且不开源，不安全，不易用，不可扩展。于是萌生出自己写一个开源免费的剑灵卡刀助手的想法，便就有了这个项目。
 
+## 技术原理
+[原理](docs/principles.md)
 
+## 使用方法
+可以直接下载构建好的release包，解压后，`右键` -> `以管理员身份运行` -> `bns_skill_assistant.exe`即可。
+
+具体使用方法：[用户教程](docs/usage.md)
+
+## 案例
+
+详见[案例](docs/examples.md)
+
+## 开发
+### 依赖
+- windows 10 or higher
+- flutter 3.19.6
+- Visual Studio - (Visual Studio Professional 2022 17.8.1)
+- VS Code or Android Studio or IntelliJ IDEA - for development
+
+### 编译运行
+```powershell
+flutter pub get
+flutter run -d windows
+```
+
+### 打包
+```powershell
+flutter build windows
+```

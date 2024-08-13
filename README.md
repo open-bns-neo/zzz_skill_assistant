@@ -1,7 +1,7 @@
-# B&S Skill Assistant
+# zzz Skill Assistant
 [![Latest Release](https://img.shields.io/github/v/release/open-bns-neo/bns_skill_assistant)](https://github.com/open-bns-neo/bns_skill_assistant/releases/latest)
 
-一个开源免费的剑灵怀旧服卡刀助手（理论上也支持现网服），支持鼠标、键盘、取色宏，安全、易用、可扩展。
+一个开源免费的绝区零卡刀助手，支持鼠标、键盘、取色宏，安全、易用、可扩展。
 
 ![img](docs/imgs/home.png)
 
